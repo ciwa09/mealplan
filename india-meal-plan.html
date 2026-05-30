@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>South India Meal Plan - 1600 kcal</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #667085;
+      --paper: #fffaf2;
+      --line: rgba(23, 32, 51, 0.12);
+      --shadow: 0 14px 38px rgba(23, 32, 51, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #root { min-height: 100%; }
+    body {
+      font-family: Lato, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #f7f1e6;
+      overflow-x: hidden;
+    }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .app-shell {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(196, 89, 45, 0.15), transparent 30rem),
+        radial-gradient(circle at 88% 10%, rgba(40, 118, 83, 0.12), transparent 28rem),
+        linear-gradient(135deg, #fff8ed 0%, #efe3d2 100%);
+      font-family: Lato, system-ui, sans-serif;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #182033 0%, #2d2538 100%);
+      color: #fff;
+      padding: 28px 20px 0;
+      text-align: center;
+      box-shadow: 0 16px 36px rgba(23, 32, 51, 0.18);
+    }
+
+    .header-inner, .page-container, .day-nav {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+    }
+
+    .app-title {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(26px, 3vw, 40px);
+      font-weight: 900;
+      letter-spacing: 0;
+      margin-bottom: 5px;
+    }
+
+    .app-subtitle {
+      font-size: 12px;
+      color: #d6dde8;
+      letter-spacing: 0.6px;
+      margin-bottom: 18px;
+      font-weight: 800;
+    }
+
+    .top-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 14px 14px 0 0;
+      padding: 5px;
+      overflow: hidden;
+    }
+
+    .mode-row {
+      display: flex;
+      justify-content: center;
+      margin: -4px 0 16px;
+    }
+
+    .diet-toggle {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 4px;
+      width: min(100%, 340px);
+    }
+
+    .diet-option {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: transparent;
+      color: #d6dde8;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 900;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .diet-option.active.veg { background: #287653; color: #fff; box-shadow: 0 5px 14px rgba(40, 118, 83, 0.32); }
+    .diet-option.active.nonveg { background: #c4592d; color: #fff; box-shadow: 0 5px 14px rgba(196, 89, 45, 0.32); }
+
+    .tab-button {
+      padding: 12px 6px;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .day-nav {
+      padding: 20px 20px 0;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      justify-content: flex-start;
+    }
+
+    .page-container {
+      padding: 18px 20px 44px;
+    }
+
+    .meal-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .meal-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .section-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .muted-label { font-size: 11px; font-weight: 800; color: #808899; letter-spacing: 0.9px; margin-bottom: 7px; }
+
+    @media (min-width: 768px) {
+      .meal-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .meal-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .meal-card-title { min-height: 50px; }
+      .meal-card-macros { min-height: 76px; }
+      .meal-card-ingredients { min-height: 210px; }
+      .meal-card-nutrients { margin-top: auto; min-height: 76px; }
+    }
+
+    @media (max-width: 560px) {
+      .app-header { padding-left: 14px; padding-right: 14px; }
+      .day-nav { justify-content: flex-start; padding-left: 14px; padding-right: 14px; }
+      .page-container { padding-left: 14px; padding-right: 14px; }
+      .top-tabs { margin-left: -2px; margin-right: -2px; }
+      .meal-card, .section-card { padding: 18px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+const { useState } = React;
+
+const themes = {
+  "Andhra Comfort": { bg: "#fff1e7", accent: "#c4592d", badge: "#ffd9c4" },
+  "Telangana Home": { bg: "#eef7ed", accent: "#287653", badge: "#cce7d6" },
+  "Tiffin Night": { bg: "#f5eefb", accent: "#6d459a", badge: "#dfcff2" },
+  "Coastal Non-Veg": { bg: "#eaf4fb", accent: "#1f6e94", badge: "#c9e3f2" },
+  "Millet Day": { bg: "#fff7db", accent: "#9b6b12", badge: "#f7e0a1" },
+  "Light Veg": { bg: "#eef8f4", accent: "#1e7d65", badge: "#c6eadc" },
+  "One-Pot Day": { bg: "#fceef5", accent: "#a53668", badge: "#f4c7dc" },
+};
+
+const weekOneMealPlan = [
+  {
+    day: "Monday",
+    theme: "Andhra Comfort",
+    lunch: {
+      name: "Tomato Pappu, Rice, Beans Poriyal and Curd",
+      time: "35 min",
+      calories: 590,
+      protein: 24,
+      carbs: 88,
+      fat: 16,
+      fiber: 15,
+      tags: ["Vegetarian", "Pressure cooker", "Helper friendly"],
+      items: ["3/4 cup cooked rice", "1 cup tomato pappu", "1 cup beans poriyal", "1/2 cup curd", "1 tsp ghee", "lemon and pickle, small amount"],
+      nutrients: ["Iron", "Folate", "Calcium", "Fiber"],
+      recipe: {
+        intro: "A simple Andhra-style plate using toor dal, tomato, rice, local beans and curd. Everything can be made on gas with a pressure cooker and kadai.",
+        steps: ["Pressure cook toor dal with tomato, turmeric and green chilli until soft.", "Temper mustard seeds, cumin, curry leaves, garlic and dried red chilli in 1 tsp oil, then simmer with the cooked dal.", "Cook beans poriyal in a kadai with mustard seeds, curry leaves, coconut if available and minimal oil.", "Serve with cooked rice, curd and a small spoon of pickle."],
+        helperNote: "Dal and beans can be cooked in the morning and reheated on the stove. No microwave needed."
+      }
+    },
+    dinner: {
+      name: "Ragi Dosa with Sambar and Coconut Chutney",
+      time: "30 min",
+      calories: 585,
+      protein: 20,
+      carbs: 84,
+      fat: 19,
+      fiber: 12,
+      tags: ["Vegetarian", "Tawa", "No oven"],
+      items: ["2 medium ragi dosas", "1.25 cups vegetable sambar", "2 tbsp coconut chutney", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Calcium", "Magnesium", "B vitamins", "Fiber"],
+      recipe: {
+        intro: "A South India dinner built around ragi flour, dosa batter, sambar vegetables and chutney.",
+        steps: ["Make ragi dosa batter with ragi flour, rice flour, curd or water, salt and cumin.", "Cook thin dosas on a hot tawa with very little oil.", "Prepare sambar with toor dal, drumstick, carrot, onion or bottle gourd and sambar powder.", "Serve dosas hot with sambar, chutney and curd."],
+        helperNote: "Ask helper to make extra sambar. It can become next-day soup or idli side."
+      }
+    }
+  },
+  {
+    day: "Tuesday",
+    theme: "Telangana Home",
+    lunch: {
+      name: "Lemon Rice with Peanut Sundal and Cucumber Curd Pachadi",
+      time: "25 min",
+      calories: 585,
+      protein: 22,
+      carbs: 82,
+      fat: 19,
+      fiber: 11,
+      tags: ["Vegetarian", "Kadai", "Lunchbox friendly"],
+      items: ["1 cup lemon rice", "1/2 cup boiled chana or peanuts", "1/2 cup cucumber curd pachadi", "1 cup rasam", "1 cup carrot-cabbage salad"],
+      nutrients: ["Vitamin C", "Magnesium", "Protein", "Fiber"],
+      recipe: {
+        intro: "A familiar rice meal with added chana or peanut sundal so it feels filling without relying on meat.",
+        steps: ["Cook rice and cool it slightly so the grains separate.", "Temper mustard seeds, chana dal, urad dal, curry leaves, green chilli, turmeric and peanuts.", "Mix with rice, lemon juice and salt.", "Boil chana for sundal or use roasted peanuts. Serve with cucumber curd pachadi and rasam."],
+        helperNote: "Rice and chana can be cooked in bulk. Lemon rice should be mixed fresh."
+      }
+    },
+    dinner: {
+      name: "Palakura Pappu with Jowar Roti and Carrot Kosambari",
+      time: "35 min",
+      calories: 600,
+      protein: 25,
+      carbs: 78,
+      fat: 21,
+      fiber: 14,
+      tags: ["Vegetarian", "Millet", "Pressure cooker"],
+      items: ["1.25 cups palakura pappu", "2 small jowar rotis", "1 cup carrot kosambari", "1/2 cup curd", "1 tsp ghee"],
+      nutrients: ["Iron", "Folate", "Calcium", "Fiber"],
+      recipe: {
+        intro: "Spinach dal with jowar roti works well in Telangana and Andhra kitchens and uses very common ingredients.",
+        steps: ["Pressure cook toor dal with spinach, onion, tomato, turmeric and green chilli.", "Temper mustard seeds, cumin, garlic and curry leaves.", "Make jowar rotis on a tawa, or use fresh phulka if jowar is not available.", "Mix grated carrot, soaked moong dal, lemon, coriander and salt for kosambari."],
+        helperNote: "Jowar roti is best made fresh. Dal can be made earlier."
+      }
+    }
+  },
+  {
+    day: "Wednesday",
+    theme: "Andhra Comfort",
+    lunch: {
+      name: "Chicken Curry, Rice and Cabbage Poriyal",
+      time: "45 min",
+      calories: 610,
+      protein: 42,
+      carbs: 62,
+      fat: 22,
+      fiber: 8,
+      tags: ["Non-veg 1 of 2", "Stovetop", "No oven"],
+      items: ["140g cooked chicken curry", "3/4 cup cooked rice", "1 cup cabbage poriyal", "1/2 cup curd", "cucumber-onion salad"],
+      nutrients: ["Protein", "B12", "Zinc", "Iron"],
+      recipe: {
+        intro: "A stovetop chicken curry using onion, tomato, ginger-garlic paste and basic masala. This is one of only two meat meals in the week.",
+        steps: ["Saute onion, ginger-garlic paste, curry leaves and tomato in 2 tsp oil.", "Add chilli powder, coriander powder, turmeric, garam masala and chicken pieces.", "Cover and cook on low flame until chicken is done, adding water as needed.", "Serve with rice, cabbage poriyal, curd and cucumber salad."],
+        helperNote: "Ask helper to keep oil measured. Chicken can be cooked in a pressure cooker if preferred."
+      }
+    },
+    dinner: {
+      name: "Vegetable Upma with Moong Sprouts Sundal",
+      time: "25 min",
+      calories: 570,
+      protein: 20,
+      carbs: 80,
+      fat: 18,
+      fiber: 13,
+      tags: ["Vegetarian", "Kadai", "Quick dinner"],
+      items: ["1.5 cups vegetable upma", "3/4 cup moong sprouts sundal", "1/2 cup curd", "tomato-cucumber salad"],
+      nutrients: ["Folate", "Magnesium", "Vitamin C", "Fiber"],
+      recipe: {
+        intro: "A light tiffin-style dinner with extra protein from sprouts.",
+        steps: ["Dry roast rava and keep aside.", "Temper mustard seeds, urad dal, chana dal, curry leaves and green chilli.", "Add onion, carrot, peas or beans, then water and roasted rava.", "Steam moong sprouts briefly and temper with mustard, curry leaves, lemon and coconut."],
+        helperNote: "Sprouts can be made at home over 1 to 2 days or bought fresh."
+      }
+    }
+  },
+  {
+    day: "Thursday",
+    theme: "Millet Day",
+    lunch: {
+      name: "Sambar Rice, Beetroot Poriyal and Curd",
+      time: "35 min",
+      calories: 590,
+      protein: 22,
+      carbs: 88,
+      fat: 17,
+      fiber: 15,
+      tags: ["Vegetarian", "One pot", "Pressure cooker"],
+      items: ["1.5 cups sambar rice", "1 cup beetroot poriyal", "1/2 cup curd", "1 tsp ghee", "papad, optional small piece"],
+      nutrients: ["Potassium", "Folate", "Fiber", "Calcium"],
+      recipe: {
+        intro: "A practical pressure-cooker lunch using rice, dal and local vegetables.",
+        steps: ["Cook rice, toor dal, sambar vegetables, turmeric and water in a pressure cooker.", "Simmer with tamarind water, sambar powder and salt.", "Temper mustard seeds, methi, curry leaves and dried red chilli.", "Make beetroot poriyal in a kadai with coconut if available."],
+        helperNote: "This is ideal for helper cooking because it scales well for family portions."
+      }
+    },
+    dinner: {
+      name: "Pesara Attu with Ginger Chutney and Vegetable Sambar",
+      time: "35 min",
+      calories: 585,
+      protein: 26,
+      carbs: 72,
+      fat: 20,
+      fiber: 13,
+      tags: ["Vegetarian", "Tawa", "High protein"],
+      items: ["2 medium pesara attu", "1 cup vegetable sambar", "2 tbsp ginger chutney", "1/2 cup curd", "onion topping, optional"],
+      nutrients: ["Plant protein", "Iron", "B vitamins", "Fiber"],
+      recipe: {
+        intro: "A classic Andhra/Telangana green gram dosa dinner cooked on a tawa.",
+        steps: ["Soak whole green moong for 6 to 8 hours.", "Grind with ginger, green chilli, cumin and salt.", "Spread on tawa like dosa and cook with a few drops of oil.", "Serve with ginger chutney, sambar and curd."],
+        helperNote: "Ask helper to soak moong in the morning for dinner."
+      }
+    }
+  },
+  {
+    day: "Friday",
+    theme: "Light Veg",
+    lunch: {
+      name: "Curd Rice with Chana Sundal and Okra Fry",
+      time: "30 min",
+      calories: 575,
+      protein: 21,
+      carbs: 78,
+      fat: 19,
+      fiber: 12,
+      tags: ["Vegetarian", "Cooling", "Easy ingredients"],
+      items: ["1.25 cups curd rice", "3/4 cup chana sundal", "1 cup okra fry", "pomegranate or grated carrot", "small pickle serving"],
+      nutrients: ["Calcium", "Protein", "Fiber", "Probiotics"],
+      recipe: {
+        intro: "A cooling meal for hot weather, made more balanced with chana and okra.",
+        steps: ["Cook rice soft, cool slightly, then mix with curd, salt and a little milk or water if needed.", "Temper mustard, urad dal, curry leaves, ginger and green chilli.", "Boil chana until soft and toss with coconut, lemon and tempering.", "Cook okra on a tawa or kadai with minimal oil until not sticky."],
+        helperNote: "Curd rice should be mixed closer to mealtime. Chana can be batch cooked."
+      }
+    },
+    dinner: {
+      name: "Ridge Gourd Dal with Rice and Cabbage Salad",
+      time: "35 min",
+      calories: 600,
+      protein: 24,
+      carbs: 86,
+      fat: 18,
+      fiber: 14,
+      tags: ["Vegetarian", "Pressure cooker", "Home style"],
+      items: ["1.25 cups ridge gourd dal", "3/4 cup cooked rice", "1 cup cabbage salad", "1/2 cup curd", "1 tsp ghee"],
+      nutrients: ["Folate", "Hydration", "Calcium", "Fiber"],
+      recipe: {
+        intro: "Beerakaya pappu style dal with rice, curd and raw cabbage salad.",
+        steps: ["Pressure cook ridge gourd with toor dal, tomato, turmeric and chilli.", "Temper mustard, cumin, garlic and curry leaves.", "Cook rice separately and portion it.", "Mix cabbage, carrot, lemon, coriander and salt just before eating."],
+        helperNote: "Ridge gourd cooks quickly. Avoid overcooking until watery."
+      }
+    }
+  },
+  {
+    day: "Saturday",
+    theme: "Tiffin Night",
+    lunch: {
+      name: "Vegetable Pulao with Raita and Moong Dal",
+      time: "35 min",
+      calories: 605,
+      protein: 22,
+      carbs: 86,
+      fat: 19,
+      fiber: 11,
+      tags: ["Vegetarian", "Pressure cooker", "Family meal"],
+      items: ["1.25 cups vegetable pulao", "1/2 cup cucumber raita", "3/4 cup moong dal", "salad", "1 tsp ghee"],
+      nutrients: ["Folate", "Protein", "Calcium", "Fiber"],
+      recipe: {
+        intro: "A simple pressure-cooker pulao with common vegetables and a dal side for balance.",
+        steps: ["Saute whole spices, onion, ginger-garlic paste and mixed vegetables.", "Add soaked rice, water and salt, then pressure cook carefully.", "Cook moong dal separately with turmeric and temper lightly.", "Serve with cucumber raita and salad."],
+        helperNote: "Ask helper to keep pulao oil measured and avoid excess ghee."
+      }
+    },
+    dinner: {
+      name: "Idli, Sambar, Chutney and Curd",
+      time: "25 min",
+      calories: 570,
+      protein: 19,
+      carbs: 86,
+      fat: 16,
+      fiber: 10,
+      tags: ["Vegetarian", "Idli steamer", "No oven"],
+      items: ["3 medium idlis", "1.25 cups sambar", "2 tbsp coconut chutney", "1/2 cup curd", "tomato-onion salad"],
+      nutrients: ["Fermented carbs", "Calcium", "Fiber", "Potassium"],
+      recipe: {
+        intro: "A very available dinner across Andhra and Telangana, made with idli steamer and stovetop sambar.",
+        steps: ["Steam idlis using fresh batter.", "Make sambar with dal and local vegetables.", "Grind coconut chutney with roasted chana dal, chilli and ginger.", "Serve with curd and salad."],
+        helperNote: "Fresh batter is easy to buy. Helper can steam idlis right before dinner."
+      }
+    }
+  },
+  {
+    day: "Sunday",
+    theme: "Coastal Non-Veg",
+    lunch: {
+      name: "Fish Pulusu, Rice and Cucumber Salad",
+      time: "35 min",
+      calories: 600,
+      protein: 34,
+      carbs: 72,
+      fat: 18,
+      fiber: 8,
+      tags: ["Non-veg 2 of 2", "Stovetop", "Coastal style"],
+      items: ["140g fish pulusu", "3/4 cup cooked rice", "1 cup cucumber salad", "1/2 cup curd", "1 cup sauteed greens"],
+      nutrients: ["Omega-3", "Iodine", "Protein", "B12"],
+      recipe: {
+        intro: "A tamarind-based fish curry cooked on the stovetop. This is the second and final meat/fish meal of the week.",
+        steps: ["Make pulusu base with onion, tomato, tamarind, chilli powder, turmeric and coriander powder.", "Simmer until the raw tamarind smell reduces.", "Add fish pieces and cook gently until done. Do not stir aggressively.", "Serve with rice, cucumber salad, greens and curd."],
+        helperNote: "Use locally available fish. Avoid deep frying; cook directly in curry."
+      }
+    },
+    dinner: {
+      name: "Moong Dal Khichdi with Greens and Tomato Pachadi",
+      time: "30 min",
+      calories: 580,
+      protein: 23,
+      carbs: 82,
+      fat: 17,
+      fiber: 13,
+      tags: ["Vegetarian", "One pot", "Light dinner"],
+      items: ["1.5 cups moong dal khichdi", "1 cup sauteed amaranth or spinach", "2 tbsp tomato pachadi", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Magnesium", "Iron", "Calcium", "Fiber"],
+      recipe: {
+        intro: "A gentle one-pot dinner using rice, moong dal and local greens.",
+        steps: ["Wash rice and moong dal together and pressure cook with turmeric, cumin, ginger and water.", "Temper with mustard, cumin, curry leaves and a small amount of ghee.", "Saute local greens with garlic and chilli in a kadai.", "Serve with curd, cucumber and tomato pachadi."],
+        helperNote: "Good fallback meal when you want something simple and easy to digest."
+      }
+    }
+  },
+  {
+    day: "Wednesday",
+    theme: "Andhra Comfort",
+    lunch: {
+      name: "Chicken Stew with Appam and Cucumber Salad",
+      time: "45 min",
+      calories: 610,
+      protein: 40,
+      carbs: 68,
+      fat: 20,
+      fiber: 8,
+      tags: ["Non-veg 1 of 2", "Stovetop", "No oven"],
+      items: ["140g chicken stew", "2 small appams", "1 cup cucumber salad", "1/2 cup curd", "sauteed beans"],
+      nutrients: ["Protein", "B12", "Zinc", "Iron"],
+      recipe: { intro: "A mild stovetop chicken stew with appam for the weekly Wednesday non-veg meal.", steps: ["Cook onion, ginger, curry leaves and whole spices in measured oil.", "Add chicken, carrot and beans, then simmer with thin coconut milk or light milk.", "Finish with pepper and coriander.", "Serve with appam, salad and curd."], helperNote: "Keep coconut milk light and avoid extra oil." }
+    },
+    dinner: {
+      name: "Korra Upma with Sambar and Coconut Chutney",
+      time: "30 min",
+      calories: 575,
+      protein: 20,
+      carbs: 80,
+      fat: 18,
+      fiber: 12,
+      tags: ["Vegetarian", "Millet", "Kadai"],
+      items: ["1.5 cups foxtail millet upma", "1 cup sambar", "2 tbsp coconut chutney", "1/2 cup curd", "carrot salad"],
+      nutrients: ["Magnesium", "Calcium", "B vitamins", "Fiber"],
+      recipe: { intro: "A millet upma dinner to add variety without needing special equipment.", steps: ["Rinse millet and drain.", "Temper mustard, dals, curry leaves, chilli and onion.", "Add vegetables, water and millet; cook covered until soft.", "Serve with sambar, chutney and curd."], helperNote: "Millet needs more resting time than rava; keep covered after cooking." }
+    }
+  },
+  {
+    day: "Thursday",
+    theme: "Telangana Home",
+    lunch: {
+      name: "Methi Dal, Rice and Cauliflower Poriyal",
+      time: "35 min",
+      calories: 590,
+      protein: 24,
+      carbs: 84,
+      fat: 18,
+      fiber: 14,
+      tags: ["Vegetarian", "Pressure cooker", "Greens"],
+      items: ["1.25 cups methi dal", "3/4 cup cooked rice", "1 cup cauliflower poriyal", "1/2 cup curd", "lemon"],
+      nutrients: ["Iron", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "Fenugreek leaf dal gives a different greens flavor while staying easy to cook.", steps: ["Pressure cook toor dal with methi leaves, tomato and turmeric.", "Temper mustard, cumin, garlic and curry leaves.", "Cook cauliflower poriyal in a kadai with spices and little oil.", "Serve with rice, curd and lemon."], helperNote: "Use fresh methi when available; spinach works as backup." }
+    },
+    dinner: {
+      name: "Akki Roti with Tomato Onion Chutney and Curd",
+      time: "35 min",
+      calories: 585,
+      protein: 18,
+      carbs: 86,
+      fat: 19,
+      fiber: 10,
+      tags: ["Vegetarian", "Tawa", "No oven"],
+      items: ["2 akki rotis", "2 tbsp tomato onion chutney", "1 cup vegetable sambar", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Calcium", "Potassium", "B vitamins", "Fiber"],
+      recipe: { intro: "Rice-flour roti cooked on tawa, useful when you want a non-dosa tiffin.", steps: ["Mix rice flour with grated carrot, onion, chilli, coriander and salt.", "Pat onto a cool tawa or banana leaf.", "Cook on both sides with little oil.", "Serve with sambar, chutney and curd."], helperNote: "Pat thin for crisp roti; thicker roti stays soft." }
+    }
+  },
+  {
+    day: "Friday",
+    theme: "Light Veg",
+    lunch: {
+      name: "Avakaya-Flavored Dal, Rice and Cabbage Peas Curry",
+      time: "35 min",
+      calories: 590,
+      protein: 23,
+      carbs: 86,
+      fat: 18,
+      fiber: 14,
+      tags: ["Vegetarian", "Pressure cooker", "Andhra"],
+      items: ["1.25 cups mango dal or plain dal with small avakaya", "3/4 cup cooked rice", "1 cup cabbage peas curry", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Folate", "Calcium", "Vitamin C", "Fiber"],
+      recipe: { intro: "A dal-rice meal with Andhra pickle flavor kept controlled.", steps: ["Cook plain toor dal with tomato and turmeric.", "Temper with mustard, cumin, garlic and curry leaves.", "Add a very small spoon of avakaya for flavor if desired.", "Serve with cabbage peas curry, rice and curd."], helperNote: "Keep pickle small because salt and oil add up quickly." }
+    },
+    dinner: {
+      name: "Vegetable Rava Dosa with Sambar",
+      time: "25 min",
+      calories: 575,
+      protein: 19,
+      carbs: 82,
+      fat: 18,
+      fiber: 10,
+      tags: ["Vegetarian", "Tawa", "Quick"],
+      items: ["2 rava dosas", "1.25 cups sambar", "2 tbsp peanut chutney", "1/2 cup curd", "salad"],
+      nutrients: ["Calcium", "Magnesium", "Potassium", "Fiber"],
+      recipe: { intro: "A crisp tawa dinner with sambar and chutney.", steps: ["Mix rava, rice flour, curd or water, cumin, pepper, onion and salt.", "Make a thin batter and rest briefly.", "Pour onto a hot tawa and cook until crisp.", "Serve with sambar, chutney and curd."], helperNote: "The batter should be pourable, not spread like regular dosa batter." }
+    }
+  },
+  {
+    day: "Saturday",
+    theme: "Millet Day",
+    lunch: {
+      name: "Rajma Sundal Rice Bowl with Curd Pachadi",
+      time: "40 min",
+      calories: 600,
+      protein: 24,
+      carbs: 86,
+      fat: 18,
+      fiber: 16,
+      tags: ["Vegetarian", "Stovetop", "High fiber"],
+      items: ["3/4 cup cooked rice", "3/4 cup rajma sundal", "1 cup vegetable poriyal", "1/2 cup curd pachadi", "lemon"],
+      nutrients: ["Plant protein", "Iron", "Calcium", "Fiber"],
+      recipe: { intro: "A legume-heavy vegetarian lunch using rajma in a South Indian sundal style.", steps: ["Soak and pressure cook rajma until soft.", "Temper mustard, curry leaves, chilli and coconut.", "Serve over measured rice with vegetable poriyal.", "Add curd pachadi and lemon."], helperNote: "Rajma must be soaked overnight and cooked fully." }
+    },
+    dinner: {
+      name: "Idli Upma with Sambar and Curd",
+      time: "20 min",
+      calories: 565,
+      protein: 19,
+      carbs: 80,
+      fat: 17,
+      fiber: 10,
+      tags: ["Vegetarian", "Kadai", "Leftover friendly"],
+      items: ["2 cups idli upma", "1 cup sambar", "1/2 cup curd", "cucumber salad", "2 tbsp chutney"],
+      nutrients: ["Fermented carbs", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A good way to use leftover idlis without microwave or oven.", steps: ["Crumble idlis by hand.", "Temper mustard, urad dal, curry leaves, chilli and onion.", "Add crumbled idli and toss until warm.", "Serve with sambar, chutney and curd."], helperNote: "Use fresh steamed idlis if leftovers are not available." }
+    }
+  },
+  {
+    day: "Sunday",
+    theme: "Coastal Non-Veg",
+    lunch: {
+      name: "Prawn Tomato Curry with Rice and Greens",
+      time: "35 min",
+      calories: 600,
+      protein: 38,
+      carbs: 70,
+      fat: 18,
+      fiber: 8,
+      tags: ["Non-veg 2 of 2", "Stovetop", "Coastal"],
+      items: ["140g prawn tomato curry", "3/4 cup cooked rice", "1 cup sauteed greens", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Protein", "Iodine", "B12", "Selenium"],
+      recipe: { intro: "A quick prawn curry for Sunday, cooked entirely on the stove.", steps: ["Cook onion, tomato, ginger-garlic paste and spices until thick.", "Add cleaned prawns and simmer briefly until just cooked.", "Do not overcook prawns.", "Serve with rice, greens, curd and salad."], helperNote: "Use fish instead if prawns are not fresh or affordable." }
+    },
+    dinner: {
+      name: "Vegetable Pongal with Pepper Rasam",
+      time: "30 min",
+      calories: 575,
+      protein: 20,
+      carbs: 80,
+      fat: 18,
+      fiber: 11,
+      tags: ["Vegetarian", "One pot", "Light dinner"],
+      items: ["1.5 cups vegetable pongal", "1 cup pepper rasam", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Magnesium", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A gentle vegetarian dinner after the Sunday non-veg lunch.", steps: ["Pressure cook rice and moong dal with vegetables.", "Temper pepper, cumin, ginger, curry leaves and a measured tsp ghee.", "Make pepper rasam separately.", "Serve with curd and cucumber."], helperNote: "Keep pongal soft and light for dinner." }
+    }
+  },
+  {
+    day: "Monday",
+    theme: "One-Pot Day",
+    lunch: {
+      name: "Mixed Vegetable Sambar Rice with Curd",
+      time: "35 min",
+      calories: 590,
+      protein: 22,
+      carbs: 88,
+      fat: 17,
+      fiber: 15,
+      tags: ["Vegetarian", "One pot", "Pressure cooker"],
+      items: ["1.5 cups sambar rice", "1/2 cup curd", "1 cup cucumber carrot salad", "2 tbsp chutney"],
+      nutrients: ["Folate", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A simple Day 29 one-pot meal using dal, rice and mixed vegetables.", steps: ["Pressure cook rice, dal and vegetables together.", "Simmer with tamarind and sambar powder.", "Temper mustard, curry leaves and dried chilli.", "Serve with curd, salad and chutney."], helperNote: "Good reset meal after a full month of variety." }
+    },
+    dinner: {
+      name: "Dosa with Ridge Gourd Chutney and Sambar",
+      time: "25 min",
+      calories: 575,
+      protein: 19,
+      carbs: 84,
+      fat: 17,
+      fiber: 11,
+      tags: ["Vegetarian", "Tawa", "No oven"],
+      items: ["2 medium dosas", "1.25 cups sambar", "2 tbsp ridge gourd chutney", "1/2 cup curd", "salad"],
+      nutrients: ["Fermented carbs", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A familiar dosa dinner with beerakaya chutney for variety.", steps: ["Cook dosas on a hot tawa.", "Saute ridge gourd peel or pieces with chilli and tamarind, then grind.", "Prepare sambar with vegetables.", "Serve with curd and salad."], helperNote: "Ridge gourd peel chutney reduces waste and tastes good." }
+    }
+  },
+  {
+    day: "Tuesday",
+    theme: "Light Veg",
+    lunch: {
+      name: "Moong Dal Palak Khichdi with Tomato Pachadi",
+      time: "30 min",
+      calories: 585,
+      protein: 23,
+      carbs: 82,
+      fat: 17,
+      fiber: 14,
+      tags: ["Vegetarian", "One pot", "Pressure cooker"],
+      items: ["1.5 cups palak moong khichdi", "2 tbsp tomato pachadi", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Iron", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "A light final-day lunch with moong dal, spinach and rice.", steps: ["Pressure cook rice, moong dal, spinach, ginger and turmeric.", "Temper cumin, mustard, garlic and curry leaves.", "Serve with tomato pachadi and curd.", "Add cucumber salad for crunch."], helperNote: "Use palakura or any fresh local greens." }
+    },
+    dinner: {
+      name: "Chapati with Mixed Vegetable Kurma",
+      time: "35 min",
+      calories: 590,
+      protein: 20,
+      carbs: 82,
+      fat: 20,
+      fiber: 12,
+      tags: ["Vegetarian", "Stovetop", "No oven"],
+      items: ["2 chapatis", "1 cup mixed vegetable kurma", "1/2 cup curd", "1 cup cucumber-onion salad"],
+      nutrients: ["Calcium", "Potassium", "B vitamins", "Fiber"],
+      recipe: { intro: "A simple chapati dinner with vegetable kurma to close the 30-day cycle.", steps: ["Cook mixed vegetables until tender.", "Simmer with light coconut or cashew masala.", "Make chapatis fresh on tawa.", "Serve with curd and salad."], helperNote: "Keep kurma light; avoid restaurant-style oil-heavy versions." }
+    }
+  }
+];
+
+const extraMealPlan = [
+  {
+    day: "Monday",
+    theme: "Telangana Home",
+    lunch: {
+      name: "Gongura Pappu, Rice and Dosakaya Pachadi",
+      time: "35 min",
+      calories: 590,
+      protein: 24,
+      carbs: 86,
+      fat: 17,
+      fiber: 15,
+      tags: ["Vegetarian", "Pressure cooker", "Andhra staple"],
+      items: ["1 cup gongura pappu", "3/4 cup cooked rice", "1 cup snake gourd or beans poriyal", "2 tbsp dosakaya pachadi", "1/2 cup curd"],
+      nutrients: ["Iron", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "A tangy dal meal using gongura or local sour greens, rice and simple vegetable poriyal.", steps: ["Pressure cook toor dal with gongura, tomato, turmeric and green chilli.", "Temper mustard, cumin, garlic, curry leaves and dried red chilli.", "Cook the poriyal in a kadai with coconut if available.", "Serve with rice, curd and dosakaya pachadi."], helperNote: "If gongura is too sour, mix with spinach or reduce the quantity." }
+    },
+    dinner: {
+      name: "Uttapam with Onion Tomato Topping and Sambar",
+      time: "25 min",
+      calories: 585,
+      protein: 21,
+      carbs: 86,
+      fat: 17,
+      fiber: 11,
+      tags: ["Vegetarian", "Tawa", "Tiffin"],
+      items: ["2 medium uttapams", "1 cup vegetable sambar", "2 tbsp peanut chutney", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Fermented carbs", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A practical tiffin dinner using idli/dosa batter with extra vegetables on top.", steps: ["Spread thick batter on a hot tawa.", "Top with onion, tomato, coriander and green chilli.", "Cook both sides with a few drops of oil.", "Serve with sambar, peanut chutney and curd."], helperNote: "Use fresh batter from a local batter shop for convenience." }
+    }
+  },
+  {
+    day: "Tuesday",
+    theme: "Millet Day",
+    lunch: {
+      name: "Foxtail Millet Pongal with Sambar and Chutney",
+      time: "35 min",
+      calories: 580,
+      protein: 21,
+      carbs: 82,
+      fat: 18,
+      fiber: 12,
+      tags: ["Vegetarian", "Millet", "Pressure cooker"],
+      items: ["1.5 cups millet pongal", "1 cup sambar", "2 tbsp coconut chutney", "1 cup cucumber-carrot salad", "1/2 cup curd"],
+      nutrients: ["Magnesium", "B vitamins", "Calcium", "Fiber"],
+      recipe: { intro: "A lighter pongal made with foxtail millet and moong dal instead of only rice.", steps: ["Dry roast moong dal lightly.", "Pressure cook millet and dal with ginger, cumin and pepper.", "Temper curry leaves, cashews if desired and a measured tsp of ghee.", "Serve with sambar, chutney and salad."], helperNote: "Millet can be replaced with rice if unavailable, but keep the portion measured." }
+    },
+    dinner: {
+      name: "Sorakaya Pappu with Phulka and Carrot Beans Poriyal",
+      time: "35 min",
+      calories: 595,
+      protein: 25,
+      carbs: 80,
+      fat: 19,
+      fiber: 14,
+      tags: ["Vegetarian", "Pressure cooker", "Home style"],
+      items: ["1.25 cups bottle gourd dal", "2 phulkas", "1 cup carrot-beans poriyal", "1/2 cup curd", "lemon"],
+      nutrients: ["Folate", "Hydration", "Calcium", "Fiber"],
+      recipe: { intro: "Bottle gourd dal is easy to digest and uses very common South Indian vegetables.", steps: ["Pressure cook bottle gourd with toor dal, tomato and turmeric.", "Temper mustard, cumin, garlic and curry leaves.", "Make soft phulkas on a tawa.", "Serve with poriyal and curd."], helperNote: "Bottle gourd cooks fast; avoid adding too much water." }
+    }
+  },
+  {
+    day: "Wednesday",
+    theme: "Andhra Comfort",
+    lunch: {
+      name: "Chicken Keema Curry with Rice and Cabbage Kootu",
+      time: "40 min",
+      calories: 605,
+      protein: 40,
+      carbs: 64,
+      fat: 21,
+      fiber: 9,
+      tags: ["Non-veg 1 of 2", "Stovetop", "No oven"],
+      items: ["140g chicken keema curry", "3/4 cup cooked rice", "1 cup cabbage kootu", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Protein", "B12", "Zinc", "Iron"],
+      recipe: { intro: "A stovetop minced chicken curry that cooks faster than bone-in curry.", steps: ["Saute onion, ginger-garlic paste, curry leaves and tomato.", "Add turmeric, chilli powder, coriander powder and chicken keema.", "Cook covered until done, adding water only as needed.", "Serve with rice, cabbage kootu, curd and cucumber."], helperNote: "Ask helper to use measured oil and drain excess fat if needed." }
+    },
+    dinner: {
+      name: "Adai Dosa with Avial-Style Mixed Vegetables",
+      time: "35 min",
+      calories: 585,
+      protein: 26,
+      carbs: 72,
+      fat: 20,
+      fiber: 14,
+      tags: ["Vegetarian", "Tawa", "High protein"],
+      items: ["2 small adai dosas", "1 cup mixed vegetable avial-style curry", "2 tbsp chutney", "1/2 cup curd", "onion-cucumber salad"],
+      nutrients: ["Plant protein", "Iron", "Calcium", "Fiber"],
+      recipe: { intro: "Adai uses mixed dals and cooks on a tawa, making it a strong vegetarian protein dinner.", steps: ["Soak rice, chana dal, toor dal and urad dal for 4 to 6 hours.", "Grind coarse with chilli, cumin and curry leaves.", "Cook thick dosas on a tawa with minimal oil.", "Serve with mixed vegetables cooked in curd-coconut masala."], helperNote: "Soak dal in the morning; batter does not need long fermentation." }
+    }
+  },
+  {
+    day: "Thursday",
+    theme: "Light Veg",
+    lunch: {
+      name: "Vankaya Tomato Curry, Rice and Moong Dal Rasam",
+      time: "35 min",
+      calories: 590,
+      protein: 21,
+      carbs: 84,
+      fat: 19,
+      fiber: 13,
+      tags: ["Vegetarian", "Kadai", "Andhra style"],
+      items: ["1 cup brinjal tomato curry", "3/4 cup cooked rice", "1 cup moong dal rasam", "1/2 cup curd", "cabbage salad"],
+      nutrients: ["Potassium", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "Brinjal and tomato curry with a light dal rasam makes a familiar Andhra lunch.", steps: ["Cook brinjal and tomato with onion, curry leaves and chilli powder.", "Cook moong dal soft and thin with rasam powder or pepper-cumin.", "Temper mustard, cumin and garlic.", "Serve with rice, curd and raw salad."], helperNote: "Use small purple brinjals when available; they cook evenly." }
+    },
+    dinner: {
+      name: "Semiya Upma with Peanut Sundal and Tomato Chutney",
+      time: "25 min",
+      calories: 575,
+      protein: 20,
+      carbs: 80,
+      fat: 18,
+      fiber: 10,
+      tags: ["Vegetarian", "Kadai", "Quick"],
+      items: ["1.5 cups vegetable semiya upma", "1/2 cup peanut sundal", "2 tbsp tomato chutney", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Magnesium", "Protein", "Calcium", "Fiber"],
+      recipe: { intro: "A fast dinner using roasted vermicelli, local vegetables and peanuts for satiety.", steps: ["Roast semiya if not pre-roasted.", "Temper mustard, dals, curry leaves, chilli and onion.", "Add vegetables, water and semiya; cook until fluffy.", "Serve with peanut sundal, chutney and curd."], helperNote: "Keep semiya portion measured because it is easy to overserve." }
+    }
+  },
+  {
+    day: "Friday",
+    theme: "One-Pot Day",
+    lunch: {
+      name: "Bisi Bele Bath with Cucumber Raita",
+      time: "40 min",
+      calories: 600,
+      protein: 22,
+      carbs: 88,
+      fat: 18,
+      fiber: 15,
+      tags: ["Vegetarian", "One pot", "Pressure cooker"],
+      items: ["1.5 cups bisi bele bath", "1/2 cup cucumber raita", "1 cup cabbage-carrot salad", "small roasted papad"],
+      nutrients: ["Folate", "Potassium", "Calcium", "Fiber"],
+      recipe: { intro: "A one-pot rice, dal and vegetable meal using ingredients easy to find in South India.", steps: ["Pressure cook rice, toor dal and mixed vegetables.", "Simmer with tamarind and bisi bele bath powder or sambar powder.", "Temper mustard, curry leaves and peanuts.", "Serve with cucumber raita and salad."], helperNote: "This is batch-friendly; keep ghee and oil measured." }
+    },
+    dinner: {
+      name: "Chapati with Chana Masala and Kachumber",
+      time: "35 min",
+      calories: 590,
+      protein: 24,
+      carbs: 82,
+      fat: 18,
+      fiber: 15,
+      tags: ["Vegetarian", "Stovetop", "High fiber"],
+      items: ["2 chapatis", "1 cup chana masala", "1 cup cucumber-onion-tomato salad", "1/2 cup curd"],
+      nutrients: ["Plant protein", "Iron", "Calcium", "Fiber"],
+      recipe: { intro: "A simple roti dinner using boiled chana and tomato-onion masala.", steps: ["Boil soaked chana until soft.", "Cook onion, tomato, ginger-garlic paste and spices in a kadai.", "Simmer chana in the masala until thick.", "Serve with chapati, salad and curd."], helperNote: "Boil extra chana and freeze or refrigerate for sundal." }
+    }
+  },
+  {
+    day: "Saturday",
+    theme: "Tiffin Night",
+    lunch: {
+      name: "Mamidikaya Pappu with Rice and Bendakaya Fry",
+      time: "35 min",
+      calories: 595,
+      protein: 23,
+      carbs: 86,
+      fat: 18,
+      fiber: 14,
+      tags: ["Vegetarian", "Seasonal", "Pressure cooker"],
+      items: ["1 cup raw mango dal", "3/4 cup cooked rice", "1 cup okra fry", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Vitamin C", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "Raw mango dal is common in Andhra summers and pairs well with rice and okra.", steps: ["Pressure cook toor dal with raw mango pieces, turmeric and chilli.", "Temper mustard, cumin, garlic and curry leaves.", "Cook okra on a tawa until crisp with little oil.", "Serve with rice and curd."], helperNote: "Adjust mango quantity based on sourness." }
+    },
+    dinner: {
+      name: "Pesarattu Upma with Ginger Chutney",
+      time: "40 min",
+      calories: 585,
+      protein: 25,
+      carbs: 76,
+      fat: 19,
+      fiber: 13,
+      tags: ["Vegetarian", "Tawa", "Andhra tiffin"],
+      items: ["2 pesarattu", "1/2 cup upma filling", "2 tbsp ginger chutney", "1 cup sambar", "1/2 cup curd"],
+      nutrients: ["Plant protein", "Iron", "B vitamins", "Fiber"],
+      recipe: { intro: "A classic Andhra tiffin dinner using green gram batter and a small upma filling.", steps: ["Soak green moong and grind with ginger, chilli and cumin.", "Make a small batch of rava upma.", "Spread pesarattu on a tawa and fill with upma.", "Serve with ginger chutney and sambar."], helperNote: "Soak moong the night before for easier grinding." }
+    }
+  },
+  {
+    day: "Sunday",
+    theme: "Coastal Non-Veg",
+    lunch: {
+      name: "Kodi Pulusu with Rice and Greens Poriyal",
+      time: "45 min",
+      calories: 610,
+      protein: 41,
+      carbs: 64,
+      fat: 22,
+      fiber: 9,
+      tags: ["Non-veg 2 of 2", "Stovetop", "Andhra style"],
+      items: ["140g chicken pulusu", "3/4 cup cooked rice", "1 cup greens poriyal", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Protein", "B12", "Iron", "Zinc"],
+      recipe: { intro: "A tamarind-based Andhra chicken curry for the Sunday non-veg meal.", steps: ["Cook onion, tomato, ginger-garlic paste and spices in a kadai.", "Add chicken and cook until sealed.", "Add tamarind water and simmer until chicken is cooked.", "Serve with rice, greens poriyal, curd and salad."], helperNote: "Use skinless chicken and keep oil measured." }
+    },
+    dinner: {
+      name: "Tomato Rice with Boiled Egg-Free Sprout Salad",
+      time: "25 min",
+      calories: 575,
+      protein: 20,
+      carbs: 84,
+      fat: 17,
+      fiber: 12,
+      tags: ["Vegetarian", "Kadai", "Quick"],
+      items: ["1.25 cups tomato rice", "3/4 cup moong sprout salad", "1/2 cup curd", "cucumber slices"],
+      nutrients: ["Vitamin C", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "A quick tomato rice dinner balanced with sprouts and curd.", steps: ["Cook onion, tomato, curry leaves and spices until thick.", "Mix with cooked rice and adjust salt.", "Steam sprouts lightly and mix with lemon, cucumber and coriander.", "Serve with curd."], helperNote: "Cook rice earlier; tomato rice comes together quickly." }
+    }
+  },
+  {
+    day: "Monday",
+    theme: "Millet Day",
+    lunch: {
+      name: "Jowar Roti with Gutti Vankaya and Curd",
+      time: "45 min",
+      calories: 600,
+      protein: 20,
+      carbs: 78,
+      fat: 23,
+      fiber: 14,
+      tags: ["Vegetarian", "Tawa", "Telugu classic"],
+      items: ["2 small jowar rotis", "1 cup gutti vankaya curry", "1/2 cup curd", "1 cup cucumber salad", "1/2 cup moong dal"],
+      nutrients: ["Magnesium", "Potassium", "Calcium", "Fiber"],
+      recipe: { intro: "Stuffed brinjal curry with jowar roti, balanced with dal and curd.", steps: ["Prepare peanut-sesame masala for small brinjals.", "Cook brinjals slowly in a kadai until soft.", "Make jowar rotis fresh on a tawa.", "Serve with moong dal, curd and salad."], helperNote: "Gutti vankaya needs attention; ask helper to cook slowly and use measured oil." }
+    },
+    dinner: {
+      name: "Idiyappam with Vegetable Kurma and Curd",
+      time: "30 min",
+      calories: 580,
+      protein: 18,
+      carbs: 86,
+      fat: 18,
+      fiber: 10,
+      tags: ["Vegetarian", "Steamer", "No oven"],
+      items: ["2 cups idiyappam", "1 cup vegetable kurma", "1/2 cup curd", "carrot-cucumber salad"],
+      nutrients: ["Calcium", "Potassium", "B vitamins", "Fiber"],
+      recipe: { intro: "A steamed dinner with vegetable kurma, useful when dosa/idli feels repetitive.", steps: ["Steam idiyappam or use fresh store-bought idiyappam.", "Cook vegetables in coconut-poppy seed or cashew-light masala.", "Keep kurma medium-thick.", "Serve with curd and salad."], helperNote: "Use less coconut if calories need to stay lower." }
+    }
+  },
+  {
+    day: "Tuesday",
+    theme: "Andhra Comfort",
+    lunch: {
+      name: "Dosakaya Pappu with Rice and Carrot Poriyal",
+      time: "35 min",
+      calories: 585,
+      protein: 23,
+      carbs: 86,
+      fat: 17,
+      fiber: 14,
+      tags: ["Vegetarian", "Pressure cooker", "Cooling"],
+      items: ["1.25 cups dosakaya pappu", "3/4 cup cooked rice", "1 cup carrot poriyal", "1/2 cup curd", "lemon pickle, small"],
+      nutrients: ["Folate", "Calcium", "Vitamin A", "Fiber"],
+      recipe: { intro: "Yellow cucumber dal is common and cooling for hot weather.", steps: ["Pressure cook dosakaya with toor dal, tomato and turmeric.", "Temper mustard, cumin, garlic and curry leaves.", "Cook carrot poriyal with coconut if available.", "Serve with rice, curd and a small pickle serving."], helperNote: "Taste dosakaya first; discard if bitter." }
+    },
+    dinner: {
+      name: "Ragi Mudde with Soppu Saaru and Buttermilk",
+      time: "35 min",
+      calories: 590,
+      protein: 22,
+      carbs: 82,
+      fat: 18,
+      fiber: 13,
+      tags: ["Vegetarian", "Millet", "Stovetop"],
+      items: ["1 medium ragi mudde", "1.25 cups greens dal saaru", "1 cup cucumber salad", "1 cup spiced buttermilk"],
+      nutrients: ["Calcium", "Iron", "Magnesium", "Fiber"],
+      recipe: { intro: "Ragi mudde with greens dal is filling and uses simple stove cooking.", steps: ["Cook ragi flour into a firm ball with hot water and salt.", "Pressure cook dal with greens and tomato.", "Temper garlic, cumin, mustard and curry leaves.", "Serve with buttermilk and salad."], helperNote: "Ragi mudde takes practice; helper can prepare it fresh." }
+    }
+  },
+  {
+    day: "Wednesday",
+    theme: "Coastal Non-Veg",
+    lunch: {
+      name: "Fish Curry with Rice and Beans Palya",
+      time: "35 min",
+      calories: 600,
+      protein: 35,
+      carbs: 72,
+      fat: 18,
+      fiber: 9,
+      tags: ["Non-veg 1 of 2", "Stovetop", "No fry"],
+      items: ["140g fish curry", "3/4 cup cooked rice", "1 cup beans palya", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Omega-3", "Iodine", "Protein", "B12"],
+      recipe: { intro: "A simple fish curry cooked directly in gravy, not fried.", steps: ["Make onion-tomato-tamarind gravy with chilli and coriander powder.", "Simmer until the masala is cooked.", "Add fish pieces and cook gently.", "Serve with rice, beans and curd."], helperNote: "Use any fresh local fish; avoid deep-fried versions." }
+    },
+    dinner: {
+      name: "Dibba Rotti with Tomato Chutney and Sambar",
+      time: "35 min",
+      calories: 585,
+      protein: 20,
+      carbs: 84,
+      fat: 18,
+      fiber: 10,
+      tags: ["Vegetarian", "Tawa", "Andhra tiffin"],
+      items: ["2 pieces dibba rotti", "1 cup sambar", "2 tbsp tomato chutney", "1/2 cup curd", "salad"],
+      nutrients: ["Fermented carbs", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A thick dosa-style tiffin made in a kadai or thick tawa with idli batter.", steps: ["Pour thick idli batter into a greased small kadai or thick tawa.", "Cook covered on low flame until crisp outside.", "Flip carefully and cook the other side.", "Serve with sambar, chutney and curd."], helperNote: "Low flame prevents burning before the center cooks." }
+    }
+  },
+  {
+    day: "Thursday",
+    theme: "Light Veg",
+    lunch: {
+      name: "Thotakura Pappu with Rice and Beetroot Kosambari",
+      time: "35 min",
+      calories: 590,
+      protein: 24,
+      carbs: 86,
+      fat: 17,
+      fiber: 15,
+      tags: ["Vegetarian", "Greens", "Pressure cooker"],
+      items: ["1.25 cups amaranth dal", "3/4 cup cooked rice", "1 cup beetroot kosambari", "1/2 cup curd", "1 tsp ghee"],
+      nutrients: ["Iron", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "Amaranth greens dal is common, nutritious and easy for helpers to cook.", steps: ["Pressure cook greens with toor dal, tomato and turmeric.", "Temper mustard, cumin, garlic and curry leaves.", "Make beetroot kosambari with soaked moong dal and lemon.", "Serve with rice, curd and measured ghee."], helperNote: "Wash greens very well before chopping." }
+    },
+    dinner: {
+      name: "Vegetable Dalia Khichdi with Kadhi",
+      time: "30 min",
+      calories: 575,
+      protein: 21,
+      carbs: 80,
+      fat: 17,
+      fiber: 13,
+      tags: ["Vegetarian", "One pot", "Light"],
+      items: ["1.5 cups vegetable dalia khichdi", "3/4 cup curd kadhi", "cucumber salad", "2 tbsp chutney"],
+      nutrients: ["B vitamins", "Calcium", "Magnesium", "Fiber"],
+      recipe: { intro: "Broken wheat khichdi gives a change from rice while staying easy to cook.", steps: ["Roast dalia lightly.", "Pressure cook with moong dal, vegetables, turmeric and cumin.", "Make a light curd kadhi on the stove.", "Serve with cucumber and chutney."], helperNote: "Keep kadhi on low flame after adding curd to avoid splitting." }
+    }
+  },
+  {
+    day: "Friday",
+    theme: "Telangana Home",
+    lunch: {
+      name: "Pulihora with Chana Sundal and Curd",
+      time: "30 min",
+      calories: 590,
+      protein: 21,
+      carbs: 84,
+      fat: 19,
+      fiber: 12,
+      tags: ["Vegetarian", "Kadai", "Traditional"],
+      items: ["1 cup pulihora", "3/4 cup chana sundal", "1/2 cup curd", "1 cup cucumber salad", "1 cup rasam"],
+      nutrients: ["Plant protein", "Magnesium", "Calcium", "Fiber"],
+      recipe: { intro: "Tamarind rice balanced with chana sundal, curd and salad.", steps: ["Prepare pulihora paste with tamarind, turmeric, curry leaves and peanuts.", "Mix with cooked rice.", "Boil chana and temper with mustard, curry leaves and coconut.", "Serve with curd, salad and rasam."], helperNote: "Pulihora paste can be made ahead and used for two meals." }
+    },
+    dinner: {
+      name: "Vegetable Oats Dosa with Sambar",
+      time: "25 min",
+      calories: 570,
+      protein: 20,
+      carbs: 78,
+      fat: 18,
+      fiber: 12,
+      tags: ["Vegetarian", "Tawa", "Quick"],
+      items: ["2 oats dosas", "1.25 cups sambar", "2 tbsp chutney", "1/2 cup curd", "carrot salad"],
+      nutrients: ["Beta-glucan", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "A quick dosa variation using oats, rava and curd or water.", steps: ["Blend oats into coarse flour.", "Mix with rava, rice flour, curd, water, cumin and salt.", "Rest briefly and cook thin dosas on tawa.", "Serve with sambar, chutney and curd."], helperNote: "Make batter thin like rava dosa batter." }
+    }
+  },
+  {
+    day: "Saturday",
+    theme: "Andhra Comfort",
+    lunch: {
+      name: "Kandi Pappu Charu, Rice and Plantain Poriyal",
+      time: "35 min",
+      calories: 585,
+      protein: 22,
+      carbs: 88,
+      fat: 16,
+      fiber: 13,
+      tags: ["Vegetarian", "Stovetop", "Simple"],
+      items: ["1 cup pappu charu", "3/4 cup cooked rice", "1 cup raw banana poriyal", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Potassium", "Folate", "Calcium", "Fiber"],
+      recipe: { intro: "A lighter dal-charu lunch with raw banana poriyal and curd.", steps: ["Cook toor dal and thin it with tamarind water.", "Add tomato, rasam-style spices and simmer.", "Cook raw banana cubes in a kadai with curry leaves and coconut.", "Serve with rice, curd and salad."], helperNote: "Raw banana is filling, so keep rice measured." }
+    },
+    dinner: {
+      name: "Set Dosa with Vegetable Saagu",
+      time: "30 min",
+      calories: 590,
+      protein: 19,
+      carbs: 88,
+      fat: 18,
+      fiber: 11,
+      tags: ["Vegetarian", "Tawa", "No oven"],
+      items: ["3 small set dosas", "1 cup vegetable saagu", "2 tbsp chutney", "1/2 cup curd", "salad"],
+      nutrients: ["Fermented carbs", "Calcium", "Potassium", "Fiber"],
+      recipe: { intro: "Soft set dosa with vegetable saagu gives variety from regular dosa.", steps: ["Use dosa batter slightly thicker than usual.", "Cook small soft dosas on a tawa.", "Make vegetable saagu with mixed vegetables and light coconut masala.", "Serve with chutney and curd."], helperNote: "Use less coconut in saagu to keep calories controlled." }
+    }
+  },
+  {
+    day: "Sunday",
+    theme: "Coastal Non-Veg",
+    lunch: {
+      name: "Chicken Pepper Fry with Rasam Rice and Greens",
+      time: "40 min",
+      calories: 610,
+      protein: 42,
+      carbs: 62,
+      fat: 22,
+      fiber: 9,
+      tags: ["Non-veg 2 of 2", "Stovetop", "No oven"],
+      items: ["130g chicken pepper fry", "3/4 cup rasam rice", "1 cup sauteed greens", "1/2 cup curd", "cucumber salad"],
+      nutrients: ["Protein", "B12", "Iron", "Zinc"],
+      recipe: { intro: "A dry stovetop chicken pepper fry paired with rasam rice and greens.", steps: ["Cook chicken with onion, curry leaves, ginger-garlic paste and pepper-cumin powder.", "Keep it semi-dry, not deep fried.", "Prepare rasam and mix with measured rice.", "Serve with greens, curd and salad."], helperNote: "Use boneless or small bone-in pieces; avoid excess oil." }
+    },
+    dinner: {
+      name: "Curd Semiya with Sprouted Moong Salad",
+      time: "25 min",
+      calories: 565,
+      protein: 20,
+      carbs: 78,
+      fat: 18,
+      fiber: 11,
+      tags: ["Vegetarian", "Cooling", "Quick"],
+      items: ["1.25 cups curd semiya", "3/4 cup sprouted moong salad", "1 cup cucumber-carrot salad", "small pickle serving"],
+      nutrients: ["Calcium", "Folate", "Protein", "Fiber"],
+      recipe: { intro: "A cooling dinner after a non-veg lunch, balanced with sprouted moong.", steps: ["Cook semiya, cool and mix with curd and salt.", "Temper mustard, curry leaves, ginger and green chilli.", "Mix sprouts with lemon, cucumber and coriander.", "Serve chilled or room temperature."], helperNote: "Mix curd closer to eating time so it does not sour." }
+    }
+  },
+  {
+    day: "Monday",
+    theme: "One-Pot Day",
+    lunch: {
+      name: "Vegetable Sagu Millet Rice Bowl with Curd",
+      time: "35 min",
+      calories: 585,
+      protein: 20,
+      carbs: 84,
+      fat: 18,
+      fiber: 13,
+      tags: ["Vegetarian", "Millet", "Kadai"],
+      items: ["1 cup cooked little millet", "1 cup vegetable sagu", "1/2 cup curd", "1/2 cup kosambari", "lemon"],
+      nutrients: ["Magnesium", "Calcium", "Folate", "Fiber"],
+      recipe: { intro: "A millet bowl with vegetable sagu for variety while using familiar vegetables.", steps: ["Cook little millet like rice.", "Prepare sagu with carrot, beans, peas and light coconut masala.", "Make kosambari with soaked moong dal.", "Serve with curd and lemon."], helperNote: "Use rice instead of millet if needed, same measured portion." }
+    },
+    dinner: {
+      name: "Tomato Pesarapappu Soup with Chapati",
+      time: "30 min",
+      calories: 575,
+      protein: 23,
+      carbs: 78,
+      fat: 17,
+      fiber: 12,
+      tags: ["Vegetarian", "Light", "Pressure cooker"],
+      items: ["1.5 cups moong dal tomato soup", "2 phulkas", "1 cup cucumber salad", "1/2 cup curd"],
+      nutrients: ["Plant protein", "Vitamin C", "Calcium", "Fiber"],
+      recipe: { intro: "A dal-soup dinner with chapati when you want something lighter than rice.", steps: ["Pressure cook moong dal with tomato, ginger and turmeric.", "Blend lightly or mash.", "Temper cumin, garlic and curry leaves.", "Serve with phulka, curd and salad."], helperNote: "Keep soup thick enough to be filling." }
+    }
+  },
+  {
+    day: "Tuesday",
+    theme: "Tiffin Night",
+    lunch: {
+      name: "Cabbage Pappu, Rice and Cucumber Pachadi",
+      time: "35 min",
+      calories: 590,
+      protein: 23,
+      carbs: 88,
+      fat: 17,
+      fiber: 14,
+      tags: ["Vegetarian", "Pressure cooker", "Budget"],
+      items: ["1.25 cups cabbage dal", "3/4 cup cooked rice", "1/2 cup cucumber pachadi", "1 cup carrot salad", "1 tsp ghee"],
+      nutrients: ["Folate", "Calcium", "Vitamin C", "Fiber"],
+      recipe: { intro: "A budget-friendly dal using cabbage, rice and cooling pachadi.", steps: ["Pressure cook cabbage with dal, tomato, turmeric and chilli.", "Temper mustard, cumin, garlic and curry leaves.", "Make cucumber pachadi with curd and grated cucumber.", "Serve with rice and salad."], helperNote: "Cabbage dal is good for batch cooking." }
+    },
+    dinner: {
+      name: "Rava Idli with Sambar and Peanut Chutney",
+      time: "30 min",
+      calories: 580,
+      protein: 20,
+      carbs: 82,
+      fat: 18,
+      fiber: 10,
+      tags: ["Vegetarian", "Idli steamer", "No fermentation"],
+      items: ["3 rava idlis", "1.25 cups sambar", "2 tbsp peanut chutney", "1/2 cup curd", "salad"],
+      nutrients: ["Calcium", "Magnesium", "Potassium", "Fiber"],
+      recipe: { intro: "A no-fermentation idli option using rava and curd.", steps: ["Roast rava lightly and cool.", "Mix with curd, water, salt, ginger and vegetables.", "Add fruit salt or eno right before steaming.", "Serve with sambar, chutney and curd."], helperNote: "Steam immediately after adding eno for soft idlis." }
+    }
+  }
+];
+
+const breakfastOptions = [
+  {
+    name: "Idli with Sambar and Chutney",
+    time: "20 min",
+    calories: 380,
+    protein: 14,
+    carbs: 62,
+    fat: 9,
+    fiber: 7,
+    tags: ["Family breakfast", "Idli steamer", "No oven"],
+    items: ["2 medium idlis", "3/4 cup sambar", "1 tbsp coconut chutney", "fruit for kids, optional"],
+    nutrients: ["Fermented carbs", "Calcium", "Fiber", "Potassium"],
+    recipe: { intro: "A simple family breakfast. You can skip it, while family can eat a normal portion.", steps: ["Steam idlis using fresh batter.", "Warm sambar on the stove.", "Serve with a measured spoon of chutney.", "Add fruit for kids if needed."], helperNote: "Keep extra batter ready; idlis are the easiest helper-friendly breakfast." }
+  },
+  {
+    name: "Vegetable Upma with Curd",
+    time: "20 min",
+    calories: 390,
+    protein: 13,
+    carbs: 60,
+    fat: 12,
+    fiber: 7,
+    tags: ["Family breakfast", "Kadai", "Quick"],
+    items: ["1.25 cups vegetable upma", "1/2 cup curd", "cucumber or fruit side"],
+    nutrients: ["B vitamins", "Calcium", "Magnesium", "Fiber"],
+    recipe: { intro: "A fast stovetop breakfast with rava and vegetables.", steps: ["Roast rava and keep aside.", "Temper mustard, dals, curry leaves and chilli.", "Cook vegetables with water, then add rava.", "Serve with curd."], helperNote: "Use measured oil and add vegetables generously." }
+  },
+  {
+    name: "Dosa with Peanut Chutney and Sambar",
+    time: "20 min",
+    calories: 385,
+    protein: 13,
+    carbs: 58,
+    fat: 12,
+    fiber: 6,
+    tags: ["Family breakfast", "Tawa", "No oven"],
+    items: ["1 large dosa or 2 small dosas", "2 tbsp peanut chutney", "1/2 cup sambar"],
+    nutrients: ["Fermented carbs", "Protein", "Magnesium", "Fiber"],
+    recipe: { intro: "Classic South Indian breakfast using dosa batter and stovetop sides.", steps: ["Heat tawa and spread dosa batter thin.", "Cook with a few drops of oil.", "Serve with peanut chutney and sambar.", "For kids, add a small ghee smear if desired."], helperNote: "Fresh batter from a local shop is fine." }
+  },
+  {
+    name: "Pesarattu with Ginger Chutney",
+    time: "25 min",
+    calories: 395,
+    protein: 18,
+    carbs: 54,
+    fat: 11,
+    fiber: 8,
+    tags: ["Family breakfast", "High protein", "Tawa"],
+    items: ["1 large pesarattu", "2 tbsp ginger chutney", "1/2 cup curd", "onion topping, optional"],
+    nutrients: ["Plant protein", "Iron", "B vitamins", "Fiber"],
+    recipe: { intro: "A green gram breakfast that gives more protein than regular dosa.", steps: ["Soak whole green moong overnight.", "Grind with ginger, chilli, cumin and salt.", "Cook on tawa like dosa.", "Serve with ginger chutney and curd."], helperNote: "Ask helper to soak moong the previous night." }
+  },
+  {
+    name: "Ragi Malt, Banana and Boiled Chana",
+    time: "15 min",
+    calories: 370,
+    protein: 14,
+    carbs: 62,
+    fat: 8,
+    fiber: 9,
+    tags: ["Family breakfast", "Stovetop", "Kid friendly"],
+    items: ["1 cup unsweetened ragi malt", "1 small banana", "1/2 cup boiled chana sundal"],
+    nutrients: ["Calcium", "Iron", "Magnesium", "Fiber"],
+    recipe: { intro: "A simple breakfast option for busy mornings, especially useful for kids.", steps: ["Cook ragi flour with water until glossy.", "Add milk or curd after cooling slightly if desired.", "Serve with banana and boiled chana sundal.", "Keep sugar minimal."], helperNote: "Make ragi malt fresh; it thickens as it sits." }
+  },
+  {
+    name: "Poha with Peanuts and Curd",
+    time: "20 min",
+    calories: 385,
+    protein: 13,
+    carbs: 58,
+    fat: 12,
+    fiber: 7,
+    tags: ["Family breakfast", "Kadai", "Quick"],
+    items: ["1.25 cups vegetable poha", "1 tbsp peanuts", "1/2 cup curd", "lemon"],
+    nutrients: ["Iron", "Vitamin C", "Calcium", "Fiber"],
+    recipe: { intro: "A light breakfast that uses flattened rice, peanuts and vegetables.", steps: ["Rinse poha briefly and drain.", "Temper mustard, curry leaves, chilli and peanuts.", "Add onion, carrot or peas, then poha.", "Finish with lemon and serve with curd."], helperNote: "Do not soak poha too long or it turns mushy." }
+  },
+  {
+    name: "Chapati Roll with Egg-Free Paneer Bhurji",
+    time: "25 min",
+    calories: 400,
+    protein: 18,
+    carbs: 48,
+    fat: 16,
+    fiber: 6,
+    tags: ["Family breakfast", "Tawa", "Lunchbox friendly"],
+    items: ["1 chapati", "1/2 cup paneer bhurji", "cucumber sticks", "curd, optional"],
+    nutrients: ["Protein", "Calcium", "Vitamin A", "Fiber"],
+    recipe: { intro: "A more filling breakfast roll for family members, still cooked only on the stove.", steps: ["Make chapati on tawa.", "Cook onion, tomato and crumbled paneer with mild spices.", "Roll bhurji into chapati.", "Serve with cucumber sticks."], helperNote: "Use paneer moderately to keep calories within range." }
+  }
+];
+
+const mealPlan = [...weekOneMealPlan, ...extraMealPlan].map((entry, index) => ({
+  ...entry,
+  breakfast: breakfastOptions[index % breakfastOptions.length],
+  day: `Day ${index + 1} - ${entry.day}`
+}));
+
+const vegetarianLunchReplacements = {
+  2: {
+    name: "Paneer Tomato Curry, Rice and Cabbage Poriyal",
+    time: "35 min",
+    calories: 590,
+    protein: 27,
+    carbs: 78,
+    fat: 20,
+    fiber: 13,
+    tags: ["Vegetarian swap", "Stovetop", "No oven"],
+    items: ["90g paneer tomato curry", "3/4 cup cooked rice", "1 cup cabbage poriyal", "1/2 cup curd", "cucumber-onion salad"],
+    nutrients: ["Protein", "Calcium", "Fiber", "Vitamin C"],
+    recipe: { intro: "A paneer version of the Wednesday curry using the same onion-tomato base as the chicken day.", steps: ["Saute onion, ginger-garlic paste, curry leaves and tomato in 2 tsp oil.", "Add chilli powder, coriander powder, turmeric and garam masala.", "Add paneer cubes and simmer briefly so they stay soft.", "Serve with rice, cabbage poriyal, curd and cucumber salad."], helperNote: "Use paneer moderately and keep oil measured so the day stays under target." }
+  },
+  6: {
+    name: "Chana Pulusu, Rice and Cucumber Salad",
+    time: "35 min",
+    calories: 585,
+    protein: 24,
+    carbs: 88,
+    fat: 15,
+    fiber: 18,
+    tags: ["Vegetarian swap", "Stovetop", "Coastal style"],
+    items: ["1 cup chana pulusu", "3/4 cup cooked rice", "1 cup cucumber salad", "1/2 cup curd", "1 cup sauteed greens"],
+    nutrients: ["Plant protein", "Iron", "Fiber", "Folate"],
+    recipe: { intro: "A tamarind-based chana curry that keeps the pulusu flavor without fish.", steps: ["Pressure cook soaked chana until soft.", "Make pulusu base with onion, tomato, tamarind, chilli powder, turmeric and coriander powder.", "Simmer cooked chana in the gravy until thick.", "Serve with rice, cucumber salad, greens and curd."], helperNote: "Soak chana overnight so lunch finishes quickly." }
+  },
+  7: {
+    name: "Vegetable Kurma with Appam and Cucumber Salad",
+    time: "35 min",
+    calories: 590,
+    protein: 20,
+    carbs: 86,
+    fat: 18,
+    fiber: 14,
+    tags: ["Vegetarian swap", "Stovetop", "No oven"],
+    items: ["1 cup vegetable kurma", "2 small appams", "1 cup cucumber salad", "1/2 cup curd", "sauteed beans"],
+    nutrients: ["Fiber", "Potassium", "Calcium", "B vitamins"],
+    recipe: { intro: "A mild vegetable kurma with appam in place of chicken stew.", steps: ["Cook onion, ginger, curry leaves and whole spices in measured oil.", "Add carrot, beans, peas and potato, then simmer with light coconut milk.", "Finish with pepper and coriander.", "Serve with appam, salad and curd."], helperNote: "Keep coconut milk light and use more beans than potato." }
+  },
+  11: {
+    name: "Soya Chunk Tomato Curry with Rice and Greens",
+    time: "30 min",
+    calories: 575,
+    protein: 30,
+    carbs: 78,
+    fat: 14,
+    fiber: 16,
+    tags: ["Vegetarian swap", "Stovetop", "High protein"],
+    items: ["1 cup soya chunk tomato curry", "3/4 cup cooked rice", "1 cup sauteed greens", "1/2 cup curd", "cucumber salad"],
+    nutrients: ["Protein", "Iron", "Fiber", "Calcium"],
+    recipe: { intro: "A quick soya chunk curry that fits the Sunday tomato-curry slot without prawns.", steps: ["Soak soya chunks in hot water, rinse and squeeze well.", "Cook onion, tomato, ginger-garlic paste and spices until thick.", "Add soya chunks and simmer until the masala coats them.", "Serve with rice, greens, curd and salad."], helperNote: "Rinse soaked soya chunks well to remove the packaged smell." }
+  },
+  16: {
+    name: "Soya Keema Curry with Rice and Cabbage Kootu",
+    time: "35 min",
+    calories: 590,
+    protein: 31,
+    carbs: 80,
+    fat: 15,
+    fiber: 17,
+    tags: ["Vegetarian swap", "Stovetop", "No oven"],
+    items: ["1 cup soya keema curry", "3/4 cup cooked rice", "1 cup cabbage kootu", "1/2 cup curd", "cucumber salad"],
+    nutrients: ["Protein", "Iron", "Fiber", "Calcium"],
+    recipe: { intro: "A minced soya curry that follows the same fast keema format.", steps: ["Soak soya granules in hot water, rinse and squeeze dry.", "Saute onion, ginger-garlic paste, curry leaves and tomato.", "Add turmeric, chilli powder, coriander powder and soya granules.", "Serve with rice, cabbage kootu, curd and cucumber."], helperNote: "Cook the soya mixture until the raw smell is gone." }
+  },
+  20: {
+    name: "Paneer Pulusu with Rice and Greens Poriyal",
+    time: "35 min",
+    calories: 585,
+    protein: 26,
+    carbs: 77,
+    fat: 19,
+    fiber: 13,
+    tags: ["Vegetarian swap", "Stovetop", "Andhra style"],
+    items: ["90g paneer pulusu", "3/4 cup cooked rice", "1 cup greens poriyal", "1/2 cup curd", "cucumber salad"],
+    nutrients: ["Protein", "Calcium", "Iron", "Fiber"],
+    recipe: { intro: "A tamarind-based Andhra paneer pulusu for the Sunday curry slot.", steps: ["Cook onion, tomato, ginger-garlic paste and spices in a kadai.", "Add tamarind water and simmer until the raw smell reduces.", "Add paneer cubes near the end and simmer gently.", "Serve with rice, greens poriyal, curd and salad."], helperNote: "Add paneer at the end so it does not become rubbery." }
+  },
+  23: {
+    name: "Rajma Tomato Curry with Rice and Beans Palya",
+    time: "40 min",
+    calories: 590,
+    protein: 25,
+    carbs: 88,
+    fat: 14,
+    fiber: 19,
+    tags: ["Vegetarian swap", "Stovetop", "High fiber"],
+    items: ["1 cup rajma tomato curry", "3/4 cup cooked rice", "1 cup beans palya", "1/2 cup curd", "cucumber salad"],
+    nutrients: ["Plant protein", "Iron", "Fiber", "Folate"],
+    recipe: { intro: "A tomato-tamarind rajma curry that replaces fish while keeping a rice-curry plate.", steps: ["Soak rajma overnight and pressure cook until soft.", "Make onion-tomato-tamarind gravy with chilli and coriander powder.", "Simmer rajma until the curry thickens.", "Serve with rice, beans and curd."], helperNote: "Rajma must be fully soft before adding it to the curry." }
+  },
+  27: {
+    name: "Pepper Paneer with Rasam Rice and Greens",
+    time: "30 min",
+    calories: 585,
+    protein: 27,
+    carbs: 76,
+    fat: 20,
+    fiber: 12,
+    tags: ["Vegetarian swap", "Stovetop", "No oven"],
+    items: ["90g pepper paneer", "3/4 cup rasam rice", "1 cup sauteed greens", "1/2 cup curd", "cucumber salad"],
+    nutrients: ["Protein", "Calcium", "Iron", "Vitamin K"],
+    recipe: { intro: "A peppery paneer plate that stands in for chicken pepper fry.", steps: ["Saute onion, curry leaves, ginger-garlic paste and pepper-cumin powder.", "Add paneer cubes and toss until coated, keeping it semi-dry.", "Prepare rasam and mix with measured rice.", "Serve with greens, curd and salad."], helperNote: "Use a hot tawa or kadai and cook paneer briefly." }
+  }
+};
+
+const vegetarianShoppingSwaps = [
+  ["Paneer", "Chana", "Extra local greens", "Curd for protein"],
+  ["Soya granules", "Soya chunks", "Paneer", "Extra mixed vegetables"],
+  ["Rajma", "Paneer", "Soya chunks", "Extra beans and greens"],
+  ["Rajma", "Paneer", "Soya chunks", "Extra local greens"],
+  ["None needed for Days 29-30"]
+];
+
+const familyNutritionGuidance = [
+  { title:"Kids can eat more", detail:"The 1600 kcal cap is for an adult portion. Kids can add extra idli, dosa, chapati, rice, curd, ghee or fruit based on appetite and activity." },
+  { title:"Daily fruit", detail:"Add one fruit for kids each day: banana, guava, orange, papaya, apple, pomegranate or any seasonal local fruit." },
+  { title:"Dairy support", detail:"Keep 1 to 2 kid servings of milk, curd, buttermilk or paneer daily for calcium, protein and B12 support." },
+  { title:"Micronutrient watch", detail:"Use iodized salt, add nuts or seeds if tolerated, and discuss vitamin D or B12 supplements with a doctor if labs or diet history suggest a gap." }
+];
+
+function getDisplayMealPlan(vegetarianMode) {
+  if (!vegetarianMode) return mealPlan;
+  return mealPlan.map((day, index) => {
+    const replacement = vegetarianLunchReplacements[index];
+    if (!replacement) return day;
+    return { ...day, theme: "Light Veg", lunch: replacement, vegetarianSwap: true };
+  });
+}
+
+function getShoppingItemsForMode(items, activeWeek, vegetarianMode) {
+  if (!vegetarianMode) return items;
+  return Object.fromEntries(Object.entries(items).map(([category, categoryItems]) => (
+    category === "Non-veg twice weekly"
+      ? ["Vegetarian swaps", vegetarianShoppingSwaps[activeWeek] || ["Paneer", "Chana", "Soya chunks"]]
+      : [category, categoryItems]
+  )));
+}
+
+const shoppingList = {
+  "Breakfast staples": ["Idli/dosa batter", "Rava", "Poha", "Ragi flour", "Whole green moong", "Peanuts", "Curd", "Bananas or seasonal fruit"],
+  "Family nutrition add-ons": ["Seasonal fruit for daily kid servings", "Milk or extra curd", "Paneer or buttermilk", "Iodized salt", "Walnuts, flaxseed, chia or extra peanuts if tolerated"],
+  "Dals and legumes": ["Toor dal", "Moong dal", "Whole green moong", "Chana", "Roasted chana dal", "Peanuts"],
+  "Grains and batters": ["Raw rice", "Idli batter", "Ragi flour", "Jowar flour", "Rava", "Poha or flattened rice, optional"],
+  "Vegetables": ["Tomatoes", "Onions", "Cucumber", "Beans", "Cabbage", "Carrots", "Beetroot", "Okra", "Ridge gourd", "Spinach or palakura", "Amaranth or local greens", "Drumstick", "Mixed pulao vegetables"],
+  "Dairy": ["Curd", "Milk for curd rice adjustment", "Small amount ghee"],
+  "Non-veg twice weekly": ["Chicken", "Local fish for pulusu"],
+  "Pantry and spices": ["Mustard seeds", "Cumin", "Urad dal", "Chana dal", "Curry leaves", "Green chillies", "Dried red chillies", "Turmeric", "Chilli powder", "Coriander powder", "Sambar powder", "Tamarind", "Ginger-garlic paste", "Coconut", "Lemons", "Pickle, small serving"]
+};
+
+const weeklyShoppingLists = [
+  { label:"Week 1", days:"Days 1-7", items: shoppingList },
+  { label:"Week 2", days:"Days 8-14", items: {
+    "Breakfast staples": ["Idli/dosa batter", "Rava", "Poha", "Ragi flour", "Peanuts", "Curd", "Bananas or seasonal fruit"],
+    "Family nutrition add-ons": ["Seasonal fruit for daily kid servings", "Milk or extra curd", "Paneer or buttermilk", "Iodized salt", "Walnuts, flaxseed, chia or extra peanuts if tolerated"],
+    "Dals and legumes": ["Toor dal", "Moong dal", "Mixed adai dals", "Chana", "Peanuts", "Sprouted moong"],
+    "Grains and batters": ["Raw rice", "Idli/dosa batter", "Foxtail millet", "Jowar flour", "Semiya", "Chapati atta"],
+    "Vegetables": ["Gongura or sour greens", "Bottle gourd", "Brinjal", "Okra", "Raw mango", "Tomatoes", "Onions", "Cucumber", "Carrots", "Beans", "Mixed vegetables", "Local greens"],
+    "Dairy": ["Curd", "Buttermilk", "Small amount ghee"],
+    "Non-veg twice weekly": ["Chicken keema", "Chicken pieces for pulusu"],
+    "Pantry and spices": ["Mustard seeds", "Cumin", "Curry leaves", "Tamarind", "Sambar powder", "Chilli powder", "Coriander powder", "Ginger-garlic paste", "Coconut", "Lemons", "Peanut-sesame masala ingredients"]
+  }},
+  { label:"Week 3", days:"Days 15-21", items: {
+    "Breakfast staples": ["Idli/dosa batter", "Whole green moong", "Ragi flour", "Poha", "Chapati atta", "Paneer", "Curd"],
+    "Family nutrition add-ons": ["Seasonal fruit for daily kid servings", "Milk or extra curd", "Paneer or buttermilk", "Iodized salt", "Walnuts, flaxseed, chia or extra peanuts if tolerated"],
+    "Dals and legumes": ["Toor dal", "Moong dal", "Soaked moong for kosambari", "Chana", "Peanuts", "Sprouts"],
+    "Grains and batters": ["Raw rice", "Jowar flour", "Ragi flour", "Idiyappam or rice flour", "Dosa/idli batter", "Dalia or broken wheat"],
+    "Vegetables": ["Small brinjals", "Dosakaya", "Amaranth greens", "Cabbage", "Beetroot", "Carrots", "Beans", "Cucumber", "Tomatoes", "Plantain", "Mixed saagu vegetables"],
+    "Dairy": ["Curd", "Buttermilk", "Small amount ghee"],
+    "Non-veg twice weekly": ["Local fish", "Chicken for pepper fry"],
+    "Pantry and spices": ["Mustard seeds", "Cumin", "Pepper", "Curry leaves", "Tamarind", "Rasam powder", "Sambar powder", "Chilli powder", "Coriander powder", "Coconut", "Ginger-garlic paste", "Lemons"]
+  }},
+  { label:"Week 4", days:"Days 22-28", items: {
+    "Breakfast staples": ["Idli/dosa batter", "Rava", "Poha", "Foxtail millet", "Peanuts", "Curd", "Bananas or seasonal fruit"],
+    "Family nutrition add-ons": ["Seasonal fruit for daily kid servings", "Milk or extra curd", "Paneer or buttermilk", "Iodized salt", "Walnuts, flaxseed, chia or extra peanuts if tolerated"],
+    "Dals and legumes": ["Toor dal", "Moong dal", "Whole green moong", "Roasted chana dal", "Peanuts", "Sprouts"],
+    "Grains and batters": ["Raw rice", "Little millet", "Rava", "Ragi or dosa batter", "Chapati atta", "Semiya"],
+    "Vegetables": ["Cabbage", "Tomatoes", "Onions", "Cucumber", "Carrots", "Beans", "Local greens", "Mixed vegetables", "Drumstick", "Bottle gourd", "Curry leaves", "Coriander"],
+    "Dairy": ["Curd", "Buttermilk", "Small amount ghee"],
+    "Non-veg twice weekly": ["Fresh local fish", "Chicken"],
+    "Pantry and spices": ["Mustard seeds", "Cumin", "Urad dal", "Chana dal", "Curry leaves", "Tamarind", "Sambar powder", "Chilli powder", "Coriander powder", "Ginger-garlic paste", "Coconut", "Lemons"]
+  }},
+  { label:"Week 5", days:"Days 29-30", items: {
+    "Breakfast staples": ["Idli/dosa batter", "Vegetables for upma", "Curd", "Peanuts"],
+    "Family nutrition add-ons": ["Seasonal fruit for daily kid servings", "Milk or extra curd", "Iodized salt", "Nuts or seeds if tolerated"],
+    "Dals and legumes": ["Toor dal", "Moong dal", "Roasted chana dal"],
+    "Grains and batters": ["Raw rice", "Rava", "Idli/dosa batter"],
+    "Vegetables": ["Cabbage", "Tomatoes", "Onions", "Cucumber", "Carrots", "Local vegetables for sambar"],
+    "Dairy": ["Curd", "Small amount ghee"],
+    "Non-veg twice weekly": ["None needed for Days 29-30"],
+    "Pantry and spices": ["Mustard seeds", "Cumin", "Curry leaves", "Sambar powder", "Chilli powder", "Turmeric", "Coconut", "Lemons"]
+  }}
+];
+
+function MacroBadge({ label, value, unit, color }) {
+  return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", background:color, borderRadius:8, padding:"7px 12px", minWidth:62 }}>
+      <span style={{ fontFamily:"'Playfair Display',serif", fontSize:16, fontWeight:800 }}>{value}{unit}</span>
+      <span style={{ fontSize:10, opacity:0.72, fontWeight:700, letterSpacing:0.4 }}>{label}</span>
+    </div>
+  );
+}
+
+function getBeginnerGuide(meal, type) {
+  const text = `${meal.name} ${(meal.tags || []).join(" ")} ${meal.items.join(" ")}`.toLowerCase();
+  const has = words => words.some(word => text.includes(word));
+  const guide = {
+    equipment: "Gas stove, knife, board, measuring cups/spoons",
+    prep: ["Chop vegetables and measure rice, dal, oil, curd and chutney before cooking."],
+    cues: ["Cook mostly on medium heat and taste for salt near the end."]
+  };
+
+  if (has(["dosa", "pesarattu", "adai", "uttapam", "roti", "chapati", "phulka", "tawa", "akki"])) {
+    guide.equipment = "Tawa, spatula, ladle, small oil spoon";
+    guide.prep.push("Heat the tawa well before adding batter or roti.");
+    guide.cues.push("Use only a few drops of oil; dosa edges should lift easily and rotis should get light brown spots.");
+  }
+
+  if (has(["idli", "idiyappam", "steamer"])) {
+    guide.equipment = "Idli steamer or pressure cooker without whistle, idli plates, ladle";
+    guide.prep.push("Grease plates lightly and start water boiling before pouring batter.");
+    guide.cues.push("Steam on medium heat; idlis are done when the top is springy and a spoon comes out clean.");
+  }
+
+  if (has(["dal", "pappu", "sambar", "khichdi", "pongal", "rasam", "kadhi", "charu"])) {
+    guide.equipment = "Pressure cooker, tempering pan, ladle, measuring cups";
+    guide.prep.push("Rinse dal 2 to 3 times before pressure cooking.");
+    guide.cues.push("Let pressure release naturally; dal should mash easily before tempering.");
+  }
+
+  if (has(["rice", "pulao", "pulihora", "lemon rice", "tomato rice", "bisi bele", "curd rice"])) {
+    guide.equipment = "Rice cooker or pressure cooker, kadai, measuring cup";
+    guide.prep.push("Rinse rice until the water runs mostly clear.");
+    guide.cues.push("For mixed rice, cool cooked rice briefly so it does not become mushy.");
+  }
+
+  if (has(["curry", "poriyal", "fry", "palya", "kootu", "kurma", "saagu", "sagu", "bhurji", "sundal"])) {
+    guide.equipment = "Kadai, spatula, lid, measuring spoon";
+    guide.prep.push("Chop vegetables into similar sizes so they cook evenly.");
+    guide.cues.push("Cook masala until the raw smell is gone and vegetables are tender but not mushy.");
+  }
+
+  if (has(["chicken", "fish", "prawn", "non-veg"])) {
+    guide.prep.push("Keep raw meat or fish separate from vegetables and wash the board/knife after use.");
+    guide.cues.push("Chicken should be opaque inside; fish should flake gently; prawns should turn pink and firm.");
+  }
+
+  if (type === "breakfast") {
+    guide.prep.push("For kids, keep fruit or milk ready before serving breakfast.");
+  }
+
+  return guide;
+}
+
+function BeginnerGuide({ meal, type, colors }) {
+  const guide = getBeginnerGuide(meal, type);
+  const sections = [
+    { title:"Cookware", content:guide.equipment },
+    { title:"Prep", items:guide.prep },
+    { title:"Cooking Cue", items:guide.cues },
+  ];
+
+  return (
+    <div style={{ background:"#fff", borderRadius:10, padding:"12px 13px", marginBottom:14, border:`1px solid ${colors.badge}` }}>
+      <div className="muted-label">COOKING NOTES</div>
+      {sections.map(section => (
+        <div key={section.title} style={{ marginTop:section.title === "Cookware" ? 0 : 10 }}>
+          <div style={{ fontSize:12, fontWeight:900, color:colors.accent, marginBottom:5 }}>{section.title}</div>
+          {section.content ? (
+            <div style={{ fontSize:12, color:"#4b5563", lineHeight:1.55 }}>{section.content}</div>
+          ) : (
+            <ul style={{ margin:0, paddingLeft:18 }}>
+              {section.items.slice(0, 3).map(item => <li key={item} style={{ fontSize:12, color:"#4b5563", lineHeight:1.55, marginBottom:4 }}>{item}</li>)}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MealCard({ meal, type, colors, showRecipe }) {
+  const mealLabel = type === "breakfast" ? "Breakfast" : type === "lunch" ? "Lunch" : "Dinner";
+  return (
+    <div className="meal-card" style={{ borderTop:`4px solid ${colors.accent}` }}>
+      <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10, flexWrap:"wrap" }}>
+        <span style={{ fontSize:11, fontWeight:800, letterSpacing:1.1, color:colors.accent, textTransform:"uppercase", background:colors.badge, borderRadius:6, padding:"3px 9px" }}>
+          {mealLabel}
+        </span>
+        <span style={{ fontSize:11, color:"#667085", fontWeight:700 }}>{meal.time}</span>
+        <span style={{ marginLeft:"auto", fontSize:12, fontWeight:800, color:"#fff", background:colors.accent, borderRadius:12, padding:"3px 10px" }}>{meal.calories} kcal</span>
+      </div>
+
+      <div className="meal-card-title" style={{ fontFamily:"'Playfair Display',serif", fontSize:19, fontWeight:900, marginBottom:12, color:"#172033", lineHeight:1.3 }}>{meal.name}</div>
+
+      <div className="meal-card-macros" style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:14 }}>
+        <MacroBadge label="Protein" value={meal.protein} unit="g" color="#fee4e2" />
+        <MacroBadge label="Carbs" value={meal.carbs} unit="g" color="#e0f2fe" />
+        <MacroBadge label="Fat" value={meal.fat} unit="g" color="#fef3c7" />
+        <MacroBadge label="Fiber" value={meal.fiber} unit="g" color="#dcfce7" />
+      </div>
+
+      <div className="meal-card-ingredients" style={{ marginBottom:12 }}>
+        <div className="muted-label">INGREDIENTS</div>
+        <ul style={{ margin:0, paddingLeft:18 }}>
+          {meal.items.map((item, index) => <li key={index} style={{ fontSize:13, color:"#3f4654", marginBottom:4, lineHeight:1.45 }}>{item}</li>)}
+        </ul>
+      </div>
+
+      <div className="meal-card-nutrients" style={{ marginBottom:0 }}>
+        <div className="muted-label">KEY NUTRIENTS</div>
+        <div className="chip-row">
+          {meal.nutrients.map((n, index) => <span key={index} style={{ fontSize:11, background:colors.badge, color:colors.accent, borderRadius:20, padding:"3px 8px", fontWeight:800 }}>{n}</span>)}
+        </div>
+      </div>
+
+      {showRecipe && (
+        <div style={{ marginTop:14, background:colors.bg, borderRadius:12, padding:"14px 16px", border:`1px solid ${colors.badge}` }}>
+          <p style={{ fontSize:13, color:"#4b5563", fontStyle:"italic", marginBottom:12, lineHeight:1.6 }}>{meal.recipe.intro}</p>
+          <BeginnerGuide meal={meal} type={type} colors={colors} />
+          <div className="muted-label">STEPS</div>
+          <ol style={{ margin:0, paddingLeft:18 }}>
+            {meal.recipe.steps.map((step, index) => <li key={index} style={{ fontSize:13, color:"#293241", marginBottom:8, lineHeight:1.6 }}>{step}</li>)}
+          </ol>
+          <div style={{ marginTop:12, background:"#fff", borderRadius:8, padding:"10px 12px", borderLeft:`3px solid ${colors.accent}` }}>
+            <span style={{ fontSize:12, color:colors.accent, fontWeight:900 }}>Helper note: </span>
+            <span style={{ fontSize:12, color:"#4b5563", lineHeight:1.6 }}>{meal.recipe.helperNote}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DayNav({ activeDay, setActiveDay, days = mealPlan }) {
+  const abbrevs = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+  return (
+    <div className="day-nav">
+      {days.map((day, index) => {
+        const colors = themes[day.theme];
+        const active = activeDay === index;
+        return (
+          <button key={day.day} onClick={() => setActiveDay(index)} style={{
+            flex:"0 0 auto", background: active ? colors.accent : "#fff",
+            color: active ? "#fff" : "#4b5563", border:`2px solid ${active ? colors.accent : "#e5e7eb"}`,
+            borderRadius:12, padding:"8px 14px", fontFamily:"inherit", fontWeight:800,
+            fontSize:12, cursor:"pointer", transition:"all 0.2s", whiteSpace:"nowrap"
+          }}>
+            <div style={{ fontSize:10, opacity:0.75, marginBottom:2 }}>{abbrevs[index % 7]}</div>D{index + 1}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PlanPage({ vegetarianMode }) {
+  const [activeDay, setActiveDay] = useState(0);
+  const [showRecipes, setShowRecipes] = useState(false);
+  const displayMealPlan = getDisplayMealPlan(vegetarianMode);
+  const day = displayMealPlan[activeDay];
+  const colors = themes[day.theme];
+  const meals = [day.breakfast, day.lunch, day.dinner];
+  const totalCals = meals.reduce((sum, meal) => sum + meal.calories, 0);
+  const totalProtein = meals.reduce((sum, meal) => sum + meal.protein, 0);
+  const totalCarbs = meals.reduce((sum, meal) => sum + meal.carbs, 0);
+  const totalFat = meals.reduce((sum, meal) => sum + meal.fat, 0);
+  const totalFiber = meals.reduce((sum, meal) => sum + meal.fiber, 0);
+
+  return (
+    <div>
+      <DayNav activeDay={activeDay} setActiveDay={setActiveDay} days={displayMealPlan} />
+      <div className="page-container">
+        <div style={{ background:colors.bg, borderRadius:14, padding:"18px 22px", marginBottom:16, display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, border:`1px solid ${colors.badge}`, boxShadow:"0 10px 30px rgba(23,32,51,0.07)" }}>
+          <div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:900 }}>{day.day}</div>
+            <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", fontSize:12, color:colors.accent, fontWeight:900, letterSpacing:0.5 }}>
+              <span>{day.theme}</span>
+              {day.vegetarianSwap && <span style={{ background:colors.badge, borderRadius:20, padding:"2px 8px" }}>Vegetarian swap</span>}
+            </div>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:30, fontWeight:900, color:colors.accent }}>{totalCals}</div>
+            <div style={{ fontSize:11, color:"#667085", fontWeight:800 }}>ADULT PORTION KCAL</div>
+            <div style={{ fontSize:11, color: totalCals <= 1600 ? "#287653" : "#c4592d", fontWeight:900 }}>{totalCals <= 1600 ? "Under adult target" : `+${totalCals - 1600} over`}</div>
+          </div>
+        </div>
+
+        <div className="meal-cards-grid">
+          <MealCard meal={day.breakfast} type="breakfast" colors={colors} showRecipe={showRecipes} />
+          <MealCard meal={day.lunch} type="lunch" colors={colors} showRecipe={showRecipes} />
+          <MealCard meal={day.dinner} type="dinner" colors={colors} showRecipe={showRecipes} />
+        </div>
+
+        <button onClick={() => setShowRecipes(open => !open)} style={{
+          width:"100%", marginTop:16, padding:"12px", borderRadius:12, border:`1.5px solid ${colors.accent}`,
+          background: showRecipes ? colors.accent : "#fff", color: showRecipes ? "#fff" : colors.accent,
+          boxShadow:"0 10px 24px rgba(23,32,51,0.08)", fontFamily:"inherit", fontWeight:900, fontSize:13,
+          cursor:"pointer", transition:"all 0.2s"
+        }}>
+          {showRecipes ? "Hide Breakfast + Lunch + Dinner Recipes" : "Show Breakfast + Lunch + Dinner Recipes"}
+        </button>
+
+        <div style={{ background:"#182033", borderRadius:16, padding:"16px 20px", marginTop:14, color:"#fff" }}>
+          <div style={{ fontSize:11, fontWeight:900, letterSpacing:1, color:"#b8c0cc", marginBottom:10 }}>DAILY TOTALS</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8, textAlign:"center" }}>
+            {[
+              { label:"Protein", val:totalProtein, unit:"g", color:"#fda4af" },
+              { label:"Carbs", val:totalCarbs, unit:"g", color:"#93c5fd" },
+              { label:"Fat", val:totalFat, unit:"g", color:"#fcd34d" },
+              { label:"Fiber", val:totalFiber, unit:"g", color:"#86efac" },
+            ].map(item => (
+              <div key={item.label}>
+                <div style={{ fontFamily:"'Playfair Display',serif", fontSize:20, fontWeight:900, color:item.color }}>{item.val}{item.unit}</div>
+                <div style={{ fontSize:10, color:"#b8c0cc", fontWeight:800 }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="section-card" style={{ marginTop:14, borderLeft:`5px solid ${colors.accent}` }}>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:900, marginBottom:6 }}>Family Nutrition Add-ons</div>
+          <div style={{ fontSize:12, color:"#667085", fontWeight:800, marginBottom:12 }}>Keep the adult plan controlled, then add these for kids and active family members.</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(210px, 1fr))", gap:10 }}>
+            {familyNutritionGuidance.map(item => (
+              <div key={item.title} style={{ background:colors.bg, borderRadius:10, padding:"12px 13px", border:`1px solid ${colors.badge}` }}>
+                <div style={{ fontSize:13, fontWeight:900, color:colors.accent, marginBottom:5 }}>{item.title}</div>
+                <div style={{ fontSize:12, color:"#4b5563", lineHeight:1.55 }}>{item.detail}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecipesPage({ vegetarianMode }) {
+  const [activeDay, setActiveDay] = useState(0);
+  const displayMealPlan = getDisplayMealPlan(vegetarianMode);
+  const day = displayMealPlan[activeDay];
+  const colors = themes[day.theme];
+
+  return (
+    <div>
+      <DayNav activeDay={activeDay} setActiveDay={setActiveDay} days={displayMealPlan} />
+      <div className="page-container">
+        <div className="section-card" style={{ borderTop:`4px solid ${colors.accent}` }}>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:900, marginBottom:2 }}>{day.day} Recipes</div>
+          <div style={{ fontSize:12, color:colors.accent, fontWeight:900 }}>{day.theme}{day.vegetarianSwap ? " - vegetarian swap" : ""} - no oven, no microwave</div>
+        </div>
+        {[day.breakfast, day.lunch, day.dinner].map((meal, index) => (
+          <div key={meal.name} className="section-card" style={{ borderLeft:`5px solid ${colors.accent}` }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:8 }}>
+              <span style={{ fontSize:11, fontWeight:900, color:colors.accent, background:colors.badge, borderRadius:6, padding:"3px 9px", letterSpacing:0.8 }}>{index === 0 ? "BREAKFAST" : index === 1 ? "LUNCH" : "DINNER"}</span>
+              <span style={{ fontSize:11, color:"#667085", fontWeight:800 }}>{meal.time}</span>
+            </div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:20, fontWeight:900, marginBottom:8 }}>{meal.name}</div>
+            <p style={{ fontSize:13, color:"#4b5563", lineHeight:1.65, fontStyle:"italic", marginBottom:14 }}>{meal.recipe.intro}</p>
+            <BeginnerGuide meal={meal} type={index === 0 ? "breakfast" : index === 1 ? "lunch" : "dinner"} colors={colors} />
+            <div className="muted-label">WHAT YOU NEED</div>
+            <ul style={{ margin:0, paddingLeft:18, marginBottom:16 }}>
+              {meal.items.map(item => <li key={item} style={{ fontSize:13, color:"#3f4654", marginBottom:4, lineHeight:1.5 }}>{item}</li>)}
+            </ul>
+            <div className="muted-label">HOW TO MAKE IT</div>
+            <ol style={{ margin:0, paddingLeft:18 }}>
+              {meal.recipe.steps.map((step, stepIndex) => <li key={stepIndex} style={{ fontSize:13, color:"#293241", marginBottom:9, lineHeight:1.65 }}>{step}</li>)}
+            </ol>
+            <div style={{ marginTop:14, background:colors.bg, borderRadius:10, padding:"10px 12px", borderLeft:`3px solid ${colors.accent}` }}>
+              <span style={{ fontSize:12, color:colors.accent, fontWeight:900 }}>Helper note: </span>
+              <span style={{ fontSize:12, color:"#4b5563", lineHeight:1.6 }}>{meal.recipe.helperNote}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PrepPage() {
+  const notes = [
+    { title:"Weekly dal prep", detail:"Cook plain toor dal and moong dal in batches. Finish each meal with fresh tempering so flavors do not get boring." },
+    { title:"Recipe cooking notes", detail:"Each recipe includes short cookware, prep and cooking-cue notes before the main steps, for cooks who know the basics but want quick guidance." },
+    { title:"Breakfast for family", detail:"Breakfast is included for kids and wife. You can skip breakfast and still use lunch plus dinner as your lighter personal plan." },
+    { title:"Kids portions", detail:"Treat 1600 calories as the adult portion guide. Kids can add fruit, milk, curd, extra idli, dosa, chapati, rice or a small ghee serving based on hunger and activity." },
+    { title:"Daily fruit and dairy", detail:"Keep one fruit daily for kids and 1 to 2 servings of milk, curd, buttermilk or paneer for calcium, protein and B12 support." },
+    { title:"Vitamin D and B12 watch", detail:"Use iodized salt and add nuts or seeds if tolerated. Vitamin D and B12 may still need sunlight, labs or doctor-guided supplements, especially in vegetarian mode." },
+    { title:"No oven or microwave needed", detail:"Every recipe uses gas stove, pressure cooker, kadai, tawa or idli steamer. Reheat in a small vessel on the stove." },
+    { title:"Helper-friendly batching", detail:"Ask helpers to chop vegetables, boil chana, soak moong, make sambar base and keep curd ready. Keep oil and ghee measured." },
+    { title:"Vegetarian mode", detail:"Use the Vegetarian switch to replace non-veg lunches with paneer, chana, rajma or soya versions while keeping the same South Indian meal style." },
+    { title:"Meat limit", detail:"With Vegetarian off, each full week keeps non-veg to one or two lunches. The remaining meals use dal, sprouts, curd, millet and legumes for protein." },
+    { title:"South India ingredient filter", detail:"Meals use common Andhra/Telangana ingredients: rice, dal, sambar vegetables, curd, ragi, jowar, idli batter, local greens, paneer, chana, chicken and local fish." }
+  ];
+
+  return (
+    <div className="page-container">
+      <div className="section-card" style={{ background:"linear-gradient(135deg,#182033,#2d2538)", color:"#fff" }}>
+        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:900, marginBottom:6 }}>Cooking Setup</div>
+        <div style={{ fontSize:13, color:"#d6dde8", lineHeight:1.65 }}>Designed for Andhra Pradesh or Telangana kitchens with no microwave and no oven. A pressure cooker, kadai, tawa, mixer jar and idli steamer are enough.</div>
+      </div>
+      {notes.map(note => (
+        <div key={note.title} className="section-card">
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:900, marginBottom:6 }}>{note.title}</div>
+          <div style={{ fontSize:13, color:"#4b5563", lineHeight:1.7 }}>{note.detail}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ShoppingPage({ vegetarianMode }) {
+  const [checked, setChecked] = useState({});
+  const [activeWeek, setActiveWeek] = useState(0);
+  const toggle = key => setChecked(prev => ({ ...prev, [key]: !prev[key] }));
+  const baseWeek = weeklyShoppingLists[activeWeek];
+  const week = { ...baseWeek, items: getShoppingItemsForMode(baseWeek.items, activeWeek, vegetarianMode) };
+  const allItems = Object.values(week.items).flat();
+  const checkedCount = allItems.filter((_, index) => checked[`week-${activeWeek}-${index}`]).length;
+  let globalItemIndex = 0;
+
+  return (
+    <div className="page-container">
+      <div className="section-card">
+        <div style={{ display:"flex", justifyContent:"space-between", gap:12, marginBottom:8 }}>
+          <div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:900 }}>{week.label} Ingredients</div>
+            <div style={{ fontSize:12, color:"#667085", fontWeight:800, marginTop:2 }}>{week.days}</div>
+          </div>
+          <div style={{ fontSize:14, fontWeight:900, color:"#c4592d" }}>{checkedCount}/{allItems.length}</div>
+        </div>
+        <div style={{ background:"#edf0f4", borderRadius:99, height:8, overflow:"hidden" }}>
+          <div style={{ width:`${(checkedCount / allItems.length) * 100}%`, background:"linear-gradient(90deg,#c4592d,#287653)", height:"100%", borderRadius:99, transition:"width 0.25s" }} />
+        </div>
+      </div>
+
+      <div style={{ display:"flex", gap:8, marginBottom:16, overflowX:"auto", scrollbarWidth:"none" }}>
+        {weeklyShoppingLists.map((option, index) => (
+          <button key={option.label} onClick={() => setActiveWeek(index)} style={{
+            flex:"0 0 auto", padding:"8px 13px", borderRadius:20, border:"none", cursor:"pointer",
+            background: activeWeek === index ? "#182033" : "#fff",
+            color: activeWeek === index ? "#fff" : "#4b5563",
+            boxShadow:"0 4px 12px rgba(23,32,51,0.08)", fontFamily:"inherit", fontWeight:900, fontSize:12
+          }}>{option.label}</button>
+        ))}
+      </div>
+
+      {Object.entries(week.items).map(([category, items]) => (
+        <div key={category} className="section-card">
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:900, marginBottom:12 }}>{category}</div>
+          {items.map((item, index) => {
+            const key = `week-${activeWeek}-${globalItemIndex++}`;
+            const done = !!checked[key];
+            return (
+              <div key={item} onClick={() => toggle(key)} style={{ display:"flex", alignItems:"flex-start", gap:12, padding:"9px 0", borderBottom:index < items.length - 1 ? "1px solid #f0f2f5" : "none", cursor:"pointer", opacity:done ? 0.48 : 1 }}>
+                <div style={{ width:20, height:20, borderRadius:6, border:`2px solid ${done ? "#287653" : "#c6ccd6"}`, background:done ? "#287653" : "#fff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1 }}>
+                  {done && <span style={{ color:"#fff", fontSize:12, fontWeight:900 }}>✓</span>}
+                </div>
+                <div style={{ fontSize:13, color:"#293241", fontWeight:700, lineHeight:1.45, textDecoration:done ? "line-through" : "none" }}>{item}</div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [page, setPage] = useState("plan");
+  const [vegetarianMode, setVegetarianMode] = useState(false);
+  const tabs = [
+    { id:"plan", label:"Plan" },
+    { id:"recipes", label:"Recipes" },
+    { id:"prep", label:"Prep" },
+    { id:"shopping", label:"Ingredients" },
+  ];
+
+  return (
+    <div className="app-shell">
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+      <div className="app-header">
+        <div className="header-inner">
+          <div className="app-title">South India Meal Plan</div>
+          <div className="app-subtitle">30 DAYS · FAMILY BREAKFAST INCLUDED · ADULT 1600 KCAL MAX · KID ADD-ONS · ANDHRA / TELANGANA</div>
+          <div className="mode-row">
+            <div className="diet-toggle" role="group" aria-label="Meal preference">
+              <button type="button" className={`diet-option veg ${vegetarianMode ? "active" : ""}`} onClick={() => setVegetarianMode(true)}>Vegetarian</button>
+              <button type="button" className={`diet-option nonveg ${!vegetarianMode ? "active" : ""}`} onClick={() => setVegetarianMode(false)}>Non-vegetarian</button>
+            </div>
+          </div>
+          <div className="top-tabs">
+            {tabs.map(tab => (
+              <button key={tab.id} className="tab-button" onClick={() => setPage(tab.id)} style={{
+                background: page === tab.id ? "#fffaf2" : "transparent",
+                color: page === tab.id ? "#172033" : "#d6dde8"
+              }}>{tab.label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {page === "plan" && <PlanPage vegetarianMode={vegetarianMode} />}
+      {page === "recipes" && <RecipesPage vegetarianMode={vegetarianMode} />}
+      {page === "prep" && <PrepPage />}
+      {page === "shopping" && <ShoppingPage vegetarianMode={vegetarianMode} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

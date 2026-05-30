@@ -80,6 +80,31 @@
       margin: -4px 0 16px;
     }
 
+    .calendar-row {
+      display: flex;
+      justify-content: center;
+      margin: -8px 0 16px;
+    }
+
+    .date-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #d6dde8;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .date-control input {
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font: inherit;
+      color-scheme: dark;
+    }
+
     .diet-toggle {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1260,8 +1285,89 @@ const breakfastOptions = [
 const mealPlan = [...weekOneMealPlan, ...extraMealPlan].map((entry, index) => ({
   ...entry,
   breakfast: breakfastOptions[index % breakfastOptions.length],
-  day: `Day ${index + 1} - ${entry.day}`
+  templateDay: entry.day,
+  day: `Day ${index + 1}`
 }));
+
+function hasNonVegLunch(day) {
+  const tags = day.lunch.tags.join(" ").toLowerCase();
+  const name = day.lunch.name.toLowerCase();
+  return tags.includes("non-veg") || ["chicken", "fish", "prawn"].some(word => name.includes(word));
+}
+
+const vegetarianMealTemplates = mealPlan.map((day, index) => ({ day, index })).filter(template => !hasNonVegLunch(template.day));
+const nonVegMealTemplates = mealPlan.map((day, index) => ({ day, index })).filter(template => hasNonVegLunch(template.day));
+
+const defaultPlanStartDate = "2026-05-30";
+
+function toDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getTodayDateInput() {
+  return toDateInputValue(new Date());
+}
+
+function getSavedPlanStartDate() {
+  return window.localStorage.getItem("indiaMealPlanStartDate") || defaultPlanStartDate;
+}
+
+function savePlanStartDate(dateValue) {
+  window.localStorage.setItem("indiaMealPlanStartDate", dateValue);
+}
+
+function parseLocalDate(dateValue) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function getPlanDate(startDate, index) {
+  const date = parseLocalDate(startDate);
+  date.setDate(date.getDate() + index);
+  return date;
+}
+
+function formatPlanDate(startDate, index, options) {
+  return new Intl.DateTimeFormat("en-US", options).format(getPlanDate(startDate, index));
+}
+
+function getPlanDateTitle(startDate, index) {
+  return `${formatPlanDate(startDate, index, { weekday:"long" })}, ${formatPlanDate(startDate, index, { month:"short", day:"numeric", year:"numeric" })}`;
+}
+
+function isWednesdayOrSunday(startDate, index) {
+  const weekday = getPlanDate(startDate, index).getDay();
+  return weekday === 0 || weekday === 3;
+}
+
+function getMonthDayCount(startDate) {
+  const date = parseLocalDate(startDate);
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+}
+
+function getCalendarMealPlan(startDate) {
+  const dayCount = getMonthDayCount(startDate);
+  let vegetarianIndex = 0;
+  let nonVegIndex = 0;
+  return Array.from({ length: dayCount }, (_, index) => {
+    const useNonVegTemplate = isWednesdayOrSunday(startDate, index);
+    const source = useNonVegTemplate
+      ? nonVegMealTemplates[nonVegIndex++ % nonVegMealTemplates.length]
+      : vegetarianMealTemplates[vegetarianIndex++ % vegetarianMealTemplates.length];
+    const template = source.day;
+    return {
+      ...template,
+      breakfast: breakfastOptions[index % breakfastOptions.length],
+      day: `Day ${index + 1}`,
+      templateDay: template.templateDay,
+      templateIndex: source.index,
+      scheduledNonVegDay: useNonVegTemplate
+    };
+  });
+}
 
 const vegetarianLunchReplacements = {
   2: {
@@ -1375,7 +1481,7 @@ const vegetarianShoppingSwaps = [
   ["Soya granules", "Soya chunks", "Paneer", "Extra mixed vegetables"],
   ["Rajma", "Paneer", "Soya chunks", "Extra beans and greens"],
   ["Rajma", "Paneer", "Soya chunks", "Extra local greens"],
-  ["None needed for Days 29-30"]
+  ["None needed for final days"]
 ];
 
 const familyNutritionGuidance = [
@@ -1385,12 +1491,42 @@ const familyNutritionGuidance = [
   { title:"Micronutrient watch", detail:"Use iodized salt, add nuts or seeds if tolerated, and discuss vitamin D or B12 supplements with a doctor if labs or diet history suggest a gap." }
 ];
 
-function getDisplayMealPlan(vegetarianMode) {
-  if (!vegetarianMode) return mealPlan;
-  return mealPlan.map((day, index) => {
-    const replacement = vegetarianLunchReplacements[index];
+function getDisplayMealPlan(vegetarianMode, startDate) {
+  const calendarMealPlan = getCalendarMealPlan(startDate);
+  if (!vegetarianMode) return calendarMealPlan;
+  return calendarMealPlan.map(day => {
+    const replacement = vegetarianLunchReplacements[day.templateIndex];
     if (!replacement) return day;
     return { ...day, theme: "Light Veg", lunch: replacement, vegetarianSwap: true };
+  });
+}
+
+function getNonVegDayCountForRange(startDate, startDay, endDay) {
+  let count = 0;
+  for (let day = startDay; day <= endDay; day += 1) {
+    if (isWednesdayOrSunday(startDate, day - 1)) count += 1;
+  }
+  return count;
+}
+
+function getNonVegShoppingItems(nonVegMealCount) {
+  if (nonVegMealCount === 0) return ["None needed for these days"];
+  if (nonVegMealCount === 1) return ["Chicken or local fish for 1 Wednesday/Sunday lunch"];
+  return ["Chicken for Wednesday lunch", "Local fish or prawns for Sunday lunch"];
+}
+
+function getShoppingWeeksForStartDate(startDate) {
+  const dayCount = getMonthDayCount(startDate);
+  const weekCount = Math.ceil(dayCount / 7);
+  return weeklyShoppingLists.slice(0, weekCount).map((week, index) => {
+    const startDay = index * 7 + 1;
+    const endDay = Math.min((index + 1) * 7, dayCount);
+    const nonVegMealCount = getNonVegDayCountForRange(startDate, startDay, endDay);
+    const items = {
+      ...week.items,
+      "Non-veg twice weekly": getNonVegShoppingItems(nonVegMealCount)
+    };
+    return { ...week, days: `Days ${startDay}-${endDay}`, items };
   });
 }
 
@@ -1453,7 +1589,7 @@ const weeklyShoppingLists = [
     "Grains and batters": ["Raw rice", "Rava", "Idli/dosa batter"],
     "Vegetables": ["Cabbage", "Tomatoes", "Onions", "Cucumber", "Carrots", "Local vegetables for sambar"],
     "Dairy": ["Curd", "Small amount ghee"],
-    "Non-veg twice weekly": ["None needed for Days 29-30"],
+    "Non-veg twice weekly": ["None needed for final days"],
     "Pantry and spices": ["Mustard seeds", "Cumin", "Curry leaves", "Sambar powder", "Chilli powder", "Turmeric", "Coconut", "Lemons"]
   }}
 ];
@@ -1598,13 +1734,14 @@ function MealCard({ meal, type, colors, showRecipe }) {
   );
 }
 
-function DayNav({ activeDay, setActiveDay, days = mealPlan }) {
-  const abbrevs = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+function DayNav({ activeDay, setActiveDay, startDate, days = mealPlan }) {
   return (
     <div className="day-nav">
       {days.map((day, index) => {
         const colors = themes[day.theme];
         const active = activeDay === index;
+        const weekday = formatPlanDate(startDate, index, { weekday:"short" }).toUpperCase();
+        const dateLabel = formatPlanDate(startDate, index, { month:"short", day:"numeric" });
         return (
           <button key={day.day} onClick={() => setActiveDay(index)} style={{
             flex:"0 0 auto", background: active ? colors.accent : "#fff",
@@ -1612,7 +1749,9 @@ function DayNav({ activeDay, setActiveDay, days = mealPlan }) {
             borderRadius:12, padding:"8px 14px", fontFamily:"inherit", fontWeight:800,
             fontSize:12, cursor:"pointer", transition:"all 0.2s", whiteSpace:"nowrap"
           }}>
-            <div style={{ fontSize:10, opacity:0.75, marginBottom:2 }}>{abbrevs[index % 7]}</div>D{index + 1}
+            <div style={{ fontSize:10, opacity:0.75, marginBottom:2 }}>{weekday}</div>
+            <div>D{index + 1}</div>
+            <div style={{ fontSize:10, opacity:0.7, marginTop:2 }}>{dateLabel}</div>
           </button>
         );
       })}
@@ -1620,11 +1759,12 @@ function DayNav({ activeDay, setActiveDay, days = mealPlan }) {
   );
 }
 
-function PlanPage({ vegetarianMode }) {
+function PlanPage({ vegetarianMode, startDate }) {
   const [activeDay, setActiveDay] = useState(0);
   const [showRecipes, setShowRecipes] = useState(false);
-  const displayMealPlan = getDisplayMealPlan(vegetarianMode);
-  const day = displayMealPlan[activeDay];
+  const displayMealPlan = getDisplayMealPlan(vegetarianMode, startDate);
+  const activeDayIndex = Math.min(activeDay, displayMealPlan.length - 1);
+  const day = displayMealPlan[activeDayIndex];
   const colors = themes[day.theme];
   const meals = [day.breakfast, day.lunch, day.dinner];
   const totalCals = meals.reduce((sum, meal) => sum + meal.calories, 0);
@@ -1635,13 +1775,15 @@ function PlanPage({ vegetarianMode }) {
 
   return (
     <div>
-      <DayNav activeDay={activeDay} setActiveDay={setActiveDay} days={displayMealPlan} />
+      <DayNav activeDay={activeDayIndex} setActiveDay={setActiveDay} startDate={startDate} days={displayMealPlan} />
       <div className="page-container">
         <div style={{ background:colors.bg, borderRadius:14, padding:"18px 22px", marginBottom:16, display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, border:`1px solid ${colors.badge}`, boxShadow:"0 10px 30px rgba(23,32,51,0.07)" }}>
           <div>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:900 }}>{day.day}</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:900 }}>{day.day} - {getPlanDateTitle(startDate, activeDayIndex)}</div>
             <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", fontSize:12, color:colors.accent, fontWeight:900, letterSpacing:0.5 }}>
               <span>{day.theme}</span>
+              <span style={{ background:colors.badge, borderRadius:20, padding:"2px 8px" }}>{day.templateDay} menu</span>
+              {day.scheduledNonVegDay && <span style={{ background:colors.badge, borderRadius:20, padding:"2px 8px" }}>Wednesday/Sunday non-veg</span>}
               {day.vegetarianSwap && <span style={{ background:colors.badge, borderRadius:20, padding:"2px 8px" }}>Vegetarian swap</span>}
             </div>
           </div>
@@ -1701,19 +1843,20 @@ function PlanPage({ vegetarianMode }) {
   );
 }
 
-function RecipesPage({ vegetarianMode }) {
+function RecipesPage({ vegetarianMode, startDate }) {
   const [activeDay, setActiveDay] = useState(0);
-  const displayMealPlan = getDisplayMealPlan(vegetarianMode);
-  const day = displayMealPlan[activeDay];
+  const displayMealPlan = getDisplayMealPlan(vegetarianMode, startDate);
+  const activeDayIndex = Math.min(activeDay, displayMealPlan.length - 1);
+  const day = displayMealPlan[activeDayIndex];
   const colors = themes[day.theme];
 
   return (
     <div>
-      <DayNav activeDay={activeDay} setActiveDay={setActiveDay} days={displayMealPlan} />
+      <DayNav activeDay={activeDayIndex} setActiveDay={setActiveDay} startDate={startDate} days={displayMealPlan} />
       <div className="page-container">
         <div className="section-card" style={{ borderTop:`4px solid ${colors.accent}` }}>
           <div style={{ fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:900, marginBottom:2 }}>{day.day} Recipes</div>
-          <div style={{ fontSize:12, color:colors.accent, fontWeight:900 }}>{day.theme}{day.vegetarianSwap ? " - vegetarian swap" : ""} - no oven, no microwave</div>
+          <div style={{ fontSize:12, color:colors.accent, fontWeight:900 }}>{getPlanDateTitle(startDate, activeDayIndex)} - {day.theme}{day.vegetarianSwap ? " - vegetarian swap" : ""} - no oven, no microwave</div>
         </div>
         {[day.breakfast, day.lunch, day.dinner].map((meal, index) => (
           <div key={meal.name} className="section-card" style={{ borderLeft:`5px solid ${colors.accent}` }}>
@@ -1774,14 +1917,16 @@ function PrepPage() {
   );
 }
 
-function ShoppingPage({ vegetarianMode }) {
+function ShoppingPage({ vegetarianMode, startDate }) {
   const [checked, setChecked] = useState({});
   const [activeWeek, setActiveWeek] = useState(0);
+  const shoppingWeeks = getShoppingWeeksForStartDate(startDate);
+  const activeWeekIndex = Math.min(activeWeek, shoppingWeeks.length - 1);
   const toggle = key => setChecked(prev => ({ ...prev, [key]: !prev[key] }));
-  const baseWeek = weeklyShoppingLists[activeWeek];
-  const week = { ...baseWeek, items: getShoppingItemsForMode(baseWeek.items, activeWeek, vegetarianMode) };
+  const baseWeek = shoppingWeeks[activeWeekIndex];
+  const week = { ...baseWeek, items: getShoppingItemsForMode(baseWeek.items, activeWeekIndex, vegetarianMode) };
   const allItems = Object.values(week.items).flat();
-  const checkedCount = allItems.filter((_, index) => checked[`week-${activeWeek}-${index}`]).length;
+  const checkedCount = allItems.filter((_, index) => checked[`week-${activeWeekIndex}-${index}`]).length;
   let globalItemIndex = 0;
 
   return (
@@ -1800,11 +1945,11 @@ function ShoppingPage({ vegetarianMode }) {
       </div>
 
       <div style={{ display:"flex", gap:8, marginBottom:16, overflowX:"auto", scrollbarWidth:"none" }}>
-        {weeklyShoppingLists.map((option, index) => (
+        {shoppingWeeks.map((option, index) => (
           <button key={option.label} onClick={() => setActiveWeek(index)} style={{
             flex:"0 0 auto", padding:"8px 13px", borderRadius:20, border:"none", cursor:"pointer",
-            background: activeWeek === index ? "#182033" : "#fff",
-            color: activeWeek === index ? "#fff" : "#4b5563",
+            background: activeWeekIndex === index ? "#182033" : "#fff",
+            color: activeWeekIndex === index ? "#fff" : "#4b5563",
             boxShadow:"0 4px 12px rgba(23,32,51,0.08)", fontFamily:"inherit", fontWeight:900, fontSize:12
           }}>{option.label}</button>
         ))}
@@ -1814,7 +1959,7 @@ function ShoppingPage({ vegetarianMode }) {
         <div key={category} className="section-card">
           <div style={{ fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:900, marginBottom:12 }}>{category}</div>
           {items.map((item, index) => {
-            const key = `week-${activeWeek}-${globalItemIndex++}`;
+            const key = `week-${activeWeekIndex}-${globalItemIndex++}`;
             const done = !!checked[key];
             return (
               <div key={item} onClick={() => toggle(key)} style={{ display:"flex", alignItems:"flex-start", gap:12, padding:"9px 0", borderBottom:index < items.length - 1 ? "1px solid #f0f2f5" : "none", cursor:"pointer", opacity:done ? 0.48 : 1 }}>
@@ -1834,6 +1979,14 @@ function ShoppingPage({ vegetarianMode }) {
 function App() {
   const [page, setPage] = useState("plan");
   const [vegetarianMode, setVegetarianMode] = useState(false);
+  const [startDate, setStartDate] = useState(getSavedPlanStartDate);
+  const planDayCount = getMonthDayCount(startDate);
+
+  function handleStartDateChange(event) {
+    const nextStartDate = event.target.value || defaultPlanStartDate;
+    setStartDate(nextStartDate);
+    savePlanStartDate(nextStartDate);
+  }
   const tabs = [
     { id:"plan", label:"Plan" },
     { id:"recipes", label:"Recipes" },
@@ -1848,12 +2001,18 @@ function App() {
       <div className="app-header">
         <div className="header-inner">
           <div className="app-title">South India Meal Plan</div>
-          <div className="app-subtitle">30 DAYS · FAMILY BREAKFAST INCLUDED · ADULT 1600 KCAL MAX · KID ADD-ONS · ANDHRA / TELANGANA</div>
+          <div className="app-subtitle">{planDayCount} DAYS · FAMILY BREAKFAST INCLUDED · ADULT 1600 KCAL MAX · KID ADD-ONS · ANDHRA / TELANGANA</div>
           <div className="mode-row">
             <div className="diet-toggle" role="group" aria-label="Meal preference">
               <button type="button" className={`diet-option veg ${vegetarianMode ? "active" : ""}`} onClick={() => setVegetarianMode(true)}>Vegetarian</button>
               <button type="button" className={`diet-option nonveg ${!vegetarianMode ? "active" : ""}`} onClick={() => setVegetarianMode(false)}>Non-vegetarian</button>
             </div>
+          </div>
+          <div className="calendar-row">
+            <label className="date-control">
+              <span>Start date</span>
+              <input type="date" value={startDate} onChange={handleStartDateChange} />
+            </label>
           </div>
           <div className="top-tabs">
             {tabs.map(tab => (
@@ -1866,10 +2025,10 @@ function App() {
         </div>
       </div>
 
-      {page === "plan" && <PlanPage vegetarianMode={vegetarianMode} />}
-      {page === "recipes" && <RecipesPage vegetarianMode={vegetarianMode} />}
+      {page === "plan" && <PlanPage vegetarianMode={vegetarianMode} startDate={startDate} />}
+      {page === "recipes" && <RecipesPage vegetarianMode={vegetarianMode} startDate={startDate} />}
       {page === "prep" && <PrepPage />}
-      {page === "shopping" && <ShoppingPage vegetarianMode={vegetarianMode} />}
+      {page === "shopping" && <ShoppingPage vegetarianMode={vegetarianMode} startDate={startDate} />}
     </div>
   );
 }
